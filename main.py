@@ -1,11 +1,25 @@
 import streamlit as st
 from streamlit_molstar import st_molstar_remote
+import construct_design
 
 st.title("Construct design tool")
 
 EXAMPLE_SEQUENCE = "LRSRRVDVMDVMNRLILAMDLMNRDDALRVTGEVREYIDTVKIGYPLVLSEGMDIIAEFRKRFGCRIIADFKVADIPETNEKICRATFKAGADAIIVHGFPGADSVRACLNVAEEMGREVFLLTEMSHPGAEMFIQGAADEIARMGVDLGVKNYVGPSTRPERLSRLREIIGQDSFLISPGVGAQGGDPGETLRFADAIIVGRSIYLADNPAAAAAGIIESIKDLLIPE"
 
-st_molstar_remote("https://files.rcsb.org/view/1LOL.cif", height=600)
+if "target_data" not in st.session_state:
+    uniprot_id_input = st.text_input("Enter a UniProt ID to fetch target data from AlphaFoldDB:", "")
+    if st.button("Fetch target structure prediction"):
+        if uniprot_id_input:
+            try:
+                target_data = construct_design.fetch_target_data(uniprot_id_input)
+                st.session_state.target_data = target_data
+                st.success(f"Fetched data for UniProt ID: {uniprot_id_input}")
+                st_molstar_remote(st.session_state.target_data.alphafold_db_url, height=600)
+            except RuntimeError as e:
+                st.error(str(e))
+else:
+    st.write("Designing constructs for target: " + st.session_state.target_data.uniprot_id)
+    st_molstar_remote(st.session_state.target_data.alphafold_db_url, height=600)
 
 if 'N_term_boundaries' not in st.session_state:
     st.session_state.N_term_boundaries = []
@@ -44,3 +58,4 @@ with st.form(key="Register sequence boundaries"):
         st.markdown(f"Current N-terminal boundaries: {[x+1 for x in st.session_state.N_term_boundaries]}")
         st.markdown(f"Current C-terminal boundaries: {[x+1 for x in st.session_state.C_term_boundaries]}")
     st.markdown("Current number of constructs: " + str(len(st.session_state.N_term_boundaries)*len(st.session_state.C_term_boundaries)))
+
