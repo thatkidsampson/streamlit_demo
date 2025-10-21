@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "streamlit_app"
+description = "Demo of a streamlit app"
+readme = "README.md"
+requires-python = ">=3.11"
+dynamic = ["version"]
+dependencies = [
+  "pandas >= 2.0.0",
+  "requests",
+  "matplotlib == 3.9.0",
+  "streamlit"
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["modules*", "app*"]
+
+[tool.setuptools_scm]
+
+[project.optional-dependencies]
+tests = [
+  # Core unit testing framework.
+  "pytest",
+  # Code coverage support for pytest.
+  "pytest-cov",
+  # Read env vars for pytest from pyproject.toml
+  "pytest-env",
+  # Static typing using type annotations.
+  "mypy",
+  # All-in-one linter and formatter
+  "ruff",
+  # Documentation generator
+  "pdoc",
+  # Mocking library
+  "mock",
+  # Mocking for requests
+  "responses>=0.23",
+  # Additional packages providing stubs (type annotations) for other packages.
+  "types-requests",
+  "pytest-mock",
+]

@@ -7,17 +7,17 @@ HEADERS = {
     "Accept": "application/json",
 }
 
+
 @dataclass
 class TargetData:
     uniprot_id: str
     uniprot_sequence: str
     alphafold_db_url: str
 
+
 def fetch_target_data(uniprot_id: str) -> TargetData:
     """Fetches target data from AlphaFoldDB for a given UniProt ID."""
-    response = requests.get(
-        f"{ALPHAFOLDDB_BASE_URL}/{uniprot_id}", headers=HEADERS
-    )
+    response = requests.get(f"{ALPHAFOLDDB_BASE_URL}/{uniprot_id}", headers=HEADERS)
     if response.status_code != 200:
         raise RuntimeError(
             f"Failed to fetch prediction for UNIPROT ID: {uniprot_id}. The AFDB API returned: {response.status_code} {response.reason}"
