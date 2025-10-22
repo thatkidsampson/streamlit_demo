@@ -2,7 +2,7 @@ import streamlit as st
 from streamlit_molstar import st_molstar_remote
 import modules.construct_design as construct_design
 from bokeh.plotting import figure
-from bokeh.models import ColumnDataSource
+from bokeh.models import ColumnDataSource, HoverTool
 from streamlit_bokeh import streamlit_bokeh
 
 st.title("Construct design tool")
@@ -109,10 +109,12 @@ if "target_data" in st.session_state:
         plot_height = 60 + (10 * len(y_range))
         source = ColumnDataSource(dict(x=x_data, y=y_data))
         # Create Bokeh figure
-        construct_plot = figure(height=plot_height, title="Constructs vs sequence", x_axis_label="residue number",
-                                y_axis_label="construct", x_range=x_range, y_range=y_range,
-                                toolbar_location=None, tools="hover, box_zoom, reset")
-        construct_plot.rect(x="x", y="y",  width=0.6, height=0.6, source=source)
+        construct_plot = figure(height=plot_height, title="Constructs vs sequence", x_axis_label="Residue number",
+                                y_axis_label="Construct", x_range=x_range, y_range=y_range,
+                                toolbar_location=None, tools="box_zoom, reset")
+        construct_plot.rect(x="x", y="y",  width=0.8, height=0.6, source=source)
+        hover = HoverTool(tooltips = [("Construct", "@y"), ("Residue", "@x")])
+        construct_plot.add_tools(hover)
         construct_plot.xaxis.visible = False
 
         # Render in Streamlit
