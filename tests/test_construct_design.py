@@ -14,8 +14,7 @@ def mock_web():
 def test_fetch_target_data(mock_web):
     test_uniprot_id = "fake_uniprot_id"
 
-    fake_returned_data = [{"uniprotSequence": "FAKESEQUENCE",
-                           "pdbUrl": "FAKEURL"}]
+    fake_returned_data = [{"uniprotSequence": "FAKESEQUENCE", "pdbUrl": "FAKEURL"}]
 
     expected_output = TargetData(
         uniprot_id="fake_uniprot_id",

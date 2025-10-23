@@ -14,6 +14,7 @@ if "N_term_boundaries" not in st.session_state:
 if "C_term_boundaries" not in st.session_state:
     st.session_state.C_term_boundaries = []
 
+
 def clear_boundaries():
     st.session_state.N_term_boundaries = []
     st.session_state.C_term_boundaries = []
@@ -87,13 +88,20 @@ if "target_data" in st.session_state:
                 * len(st.session_state.C_term_boundaries)
             )
         )
+        # assign construct names and assemble into a dictionary
         construct_number = 1
         sequence_length = st.session_state.target_data.sequence_length
-        constructs = {st.session_state.target_data.uniprot_id : [str(x) for x in range(1, sequence_length)]}
+        constructs = {
+            st.session_state.target_data.uniprot_id: [
+                str(x) for x in range(1, sequence_length)
+            ]
+        }
         for Nterm in st.session_state.N_term_boundaries:
             for Cterm in st.session_state.C_term_boundaries:
                 construct_name = f"{st.session_state.target_data.uniprot_id}_construct_{construct_number}"
-                constructs[construct_name] = [str(x) for x in range(Nterm+1, Cterm+1)]
+                constructs[construct_name] = [
+                    str(x) for x in range(Nterm + 1, Cterm + 1)
+                ]
                 construct_number += 1
 
         # assemble plot data
@@ -103,21 +111,33 @@ if "target_data" in st.session_state:
             for position in residue_range:
                 y_data.append(construct)
                 x_data.append(position)
-        
         x_range = [str(x) for x in range(1, sequence_length)]
         y_range = list(constructs.keys())
         plot_height = 60 + (10 * len(y_range))
         source = ColumnDataSource(dict(x=x_data, y=y_data))
+
         # Create Bokeh figure
-        construct_plot = figure(height=plot_height, title="Constructs vs sequence", x_axis_label="Residue number",
-                                y_axis_label="Construct", x_range=x_range, y_range=y_range,
-                                toolbar_location=None, tools="box_zoom, reset")
-        construct_plot.rect(x="x", y="y",  width=0.8, height=0.6, source=source)
-        hover = HoverTool(tooltips = [("Construct", "@y"), ("Residue", "@x")])
+        construct_plot = figure(
+            height=plot_height,
+            title="Constructs vs sequence",
+            x_axis_label="Residue number",
+            y_axis_label="Construct",
+            x_range=x_range,
+            y_range=y_range,
+            toolbar_location=None,
+            tools="box_zoom, reset",
+        )
+        construct_plot.rect(x="x", y="y", width=0.8, height=0.4, source=source)
+        hover = HoverTool(tooltips=[("Construct", "@y"), ("Residue", "@x")])
         construct_plot.add_tools(hover)
         construct_plot.xaxis.visible = False
 
-        # Render in Streamlit
-        streamlit_bokeh(construct_plot, use_container_width=True, theme="streamlit", key="my_unique_key")
+        # Render Streamlit plot
+        streamlit_bokeh(
+            construct_plot,
+            use_container_width=True,
+            theme="streamlit",
+            key="my_unique_key",
+        )
 
     reset = st.button("Clear stored boundaries", on_click=clear_boundaries)
