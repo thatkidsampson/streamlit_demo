@@ -14,6 +14,10 @@ class TargetData:
     uniprot_sequence: str
     alphafold_db_url: str
 
+    @property
+    def sequence_length(self) -> int:
+        return len(self.uniprot_sequence)
+
 
 def fetch_target_data(uniprot_id: str) -> TargetData:
     """Fetches target data from AlphaFoldDB for a given UniProt ID."""
