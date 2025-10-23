@@ -1,0 +1,6 @@
+# requirements.in
+streamlit
+bokeh
+requests
+pytest
+responses
