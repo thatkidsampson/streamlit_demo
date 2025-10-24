@@ -4,6 +4,7 @@ from Bio.Data import CodonTable
 from Bio import SeqRecord
 from enum import StrEnum
 from Bio.SeqUtils import MeltingTemp as mt
+from Bio.Seq import Seq
 
 # Some parameters for the designed primers:
 
