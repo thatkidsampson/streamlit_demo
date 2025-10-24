@@ -4,7 +4,6 @@ from Bio.Data import CodonTable
 from Bio import SeqRecord
 from enum import StrEnum
 from Bio.SeqUtils import MeltingTemp as mt
-from Bio.Seq import Seq
 
 # Some parameters for the designed primers:
 
@@ -14,7 +13,7 @@ PRIMER_TARGET_TM = 60
 BSAI_PRIMER_EXTENSIONS = {"fwd": "TATGGTCTCACGAG", "rev": "TATGGTCTCAATGGCTA"}
 # When designing primers, we prefer them to end in G or C to reduce mispriming:
 PREFERRED_END_NUCLEOTIDES = ["G", "C"]
-# minimium primer length:
+# minimium primer length:
 MIN_PRIMER_LENGTH = 20
 # Codon length, in base pairs
 CODON_LENGTH = 3
@@ -28,10 +27,12 @@ HEADERS = {
 # CodonTable for reverse translation
 CODON_TABLE = CodonTable.unambiguous_dna_by_id[1]  # Standard table
 
+
 # StrEnum for primer directions
 class PrimerDirection(StrEnum):
     fwd = "fwd"
     rev = "rev"
+
 
 @dataclass
 class TargetData:
@@ -59,6 +60,7 @@ def fetch_target_data(*, uniprot_id: str) -> TargetData:
         alphafold_db_url=first_prediction["pdbUrl"],
     )
     return database_info
+
 
 def reverse_translate(*, protein_sequence: str, table: CodonTable) -> str:
     """Basic reverse translation of a protein sequence to a DNA sequence."""
@@ -94,7 +96,9 @@ def make_primer(
         loc = translation.find(protein_sequence) * CODON_LENGTH
     # for a rev primer, find the end point of the construct protein sequence in the translated template sequence
     if direction == PrimerDirection.rev:
-        loc = (translation.find(protein_sequence) + len(protein_sequence)) * CODON_LENGTH
+        loc = (
+            translation.find(protein_sequence) + len(protein_sequence)
+        ) * CODON_LENGTH
     # start with a primer length of 20bp
     n = MIN_PRIMER_LENGTH
     # start a while loop

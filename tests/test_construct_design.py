@@ -1,6 +1,5 @@
 from responses import RequestsMock
 import pytest
-import re
 
 from modules import construct_design
 from modules.construct_design import TargetData, CODON_TABLE, PrimerDirection
@@ -44,20 +43,16 @@ def test_fetch_target_data(mock_web):
     [
         (
             "TEYKLVVVGAGGVGKSALTIQLIQNH",
-            "ACTGAATATAAATTAGTTGTTGTTGGTGCTGGTGGTGTTGGTAAATCTGCTTTAACTATTCAATTAATTCAAAATCAT"
+            "ACTGAATATAAATTAGTTGTTGTTGGTGCTGGTGGTGTTGGTAAATCTGCTTTAACTATTCAATTAATTCAAAATCAT",
         ),
-        (
-            "GLNDIFEAQKIEWHE",
-            "GGTTTAAATGATATTTTTGAAGCTCAAAAAATTGAATGGCATGAA"
-
-        ),
-        ("NTAREALPRTSEQ",
-         "AATACTGCTCGTGAAGCTTTACCTCGTACTTCTGAACAA"
-         )
+        ("GLNDIFEAQKIEWHE", "GGTTTAAATGATATTTTTGAAGCTCAAAAAATTGAATGGCATGAA"),
+        ("NTAREALPRTSEQ", "AATACTGCTCGTGAAGCTTTACCTCGTACTTCTGAACAA"),
     ],
 )
 def test_reverse_translate(input_protein_sequence, expected_reverse_translation):
-    reverse_translation = construct_design.reverse_translate(protein_sequence=input_protein_sequence, table=CODON_TABLE)
+    reverse_translation = construct_design.reverse_translate(
+        protein_sequence=input_protein_sequence, table=CODON_TABLE
+    )
     assert reverse_translation == expected_reverse_translation
 
 
@@ -68,46 +63,46 @@ def test_reverse_translate(input_protein_sequence, expected_reverse_translation)
             "GHFDPAKCRYALGMQDRTIPDSDISASSSWSDSTAARHSRLESSDGDGAWCPAGS",
             test_sequences.Q08345_reverse_translate,
             PrimerDirection.fwd,
-            "GGTCATTTTGATCCTGCTAAATGTCG"
+            "GGTCATTTTGATCCTGCTAAATGTCG",
         ),
         (
             "GHFDPAKCRYALGMQDRTIPDSDISASSSWSDSTAARHSRLESSDGDGAWCPAGS",
             test_sequences.Q08345_reverse_translate,
             PrimerDirection.rev,
-            "AGAACCAGCAGGACACCAAGC"
+            "AGAACCAGCAGGACACCAAGC",
         ),
         (
             "RHSRLESSDGDGAWCPAGSVFPKEEEYLQVDLQRLHLVALVGTQGRHAGGLGKEFSRSYRLRYSRDGRRWMGWKDRWGQEVISGNEDPEGVVLKDLGPPMVARLVRFYPRADRVMSVC",
             test_sequences.Q08345_reverse_translate,
             PrimerDirection.fwd,
-            "CGTCATTCTCGTTTAGAATCTTCTGATG"
+            "CGTCATTCTCGTTTAGAATCTTCTGATG",
         ),
         (
             "RHSRLESSDGDGAWCPAGSVFPKEEEYLQVDLQRLHLVALVGTQGRHAGGLGKEFSRSYRLRYSRDGRRWMGWKDRWGQEVISGNEDPEGVVLKDLGPPMVARLVRFYPRADRVMSVC",
             test_sequences.Q08345_reverse_translate,
             PrimerDirection.rev,
-            "ACAAACAGACATAACACGATCAGCAC"
-        ), 
+            "ACAAACAGACATAACACGATCAGCAC",
+        ),
     ],
 )
-def test_make_primer(input_protein_sequence, input_template, input_direction, expected_primer):
-    primer = construct_design.make_primer(protein_sequence=input_protein_sequence,
-                                          template=input_template,
-                                          direction=input_direction)
+def test_make_primer(
+    input_protein_sequence, input_template, input_direction, expected_primer
+):
+    primer = construct_design.make_primer(
+        protein_sequence=input_protein_sequence,
+        template=input_template,
+        direction=input_direction,
+    )
     assert primer == expected_primer
 
+
 def test_make_primer_failed():
-    expected_error_message = (
-        "Could not design primer"
-    )
+    expected_error_message = "Could not design primer"
 
     with pytest.raises(ValueError) as ex:
         construct_design.make_primer(
             protein_sequence=test_sequences.Q08345_small_sequence_fragment,
             template=test_sequences.Q08345_reverse_translate_fragment,
-            direction=PrimerDirection.fwd
-            )
-    assert (
-        str(ex.value)
-        == expected_error_message
-    )
+            direction=PrimerDirection.fwd,
+        )
+    assert str(ex.value) == expected_error_message
