@@ -11,6 +11,7 @@ else:
     st.write(
         "Designing primers for target: " + st.session_state.target_data.uniprot_id
     )
+    st.markdown("### Primer table:")
     df = construct_design.generate_primer_dataframe(construct_dictionary=st.session_state.constructs,
                                                     target_data=st.session_state.target_data)
     st.dataframe(data=df)

@@ -28,7 +28,7 @@ if "target_data" not in st.session_state:
     if st.button("Fetch target structure prediction"):
         if uniprot_id_input:
             try:
-                target_data = construct_design.fetch_target_data(uniprot_id_input)
+                target_data = construct_design.fetch_target_data(uniprot_id=uniprot_id_input)
                 st.session_state.target_data = target_data
                 st.success(f"Fetched data for UniProt ID: {uniprot_id_input}")
                 st_molstar_remote(

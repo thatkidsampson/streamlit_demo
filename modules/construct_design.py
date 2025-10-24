@@ -164,7 +164,7 @@ def generate_primer_dataframe(*, construct_dictionary: dict, target_data: Target
     # slice the input sequence to generate the various construct sequences
     df = pd.DataFrame.from_dict(construct_dictionary, orient='index',
                        columns=['Start residue', 'End residue'])
-    df["Protein sequence"] = df.apply(lambda x: slice_sequence(target_data.uniprot_sequence, x["Start residue"]-1, x["End residue"]-1), axis=1)
+    df["Sequence"] = df.apply(lambda x: slice_sequence(target_data.uniprot_sequence, x["Start residue"]-1, x["End residue"]-1), axis=1)
 
     # generate the forward and reverse primers for each sequence
     for direction in PrimerDirection:
@@ -177,9 +177,9 @@ def generate_primer_dataframe(*, construct_dictionary: dict, target_data: Target
         )
         # assign the primers auto-generated names
         primer_names = generate_primer_names(input_df=df, direction=direction)
-        df = pd.merge(
-            df, primer_names, how="left", on=f"{direction}_primer"
-        )
+        # a regular merge will delete the index of the left-hand dataframe
+        # this will merge the two dataframes while preserving the left-hand index
+        df.reset_index().merge(primer_names, how="left", on=f"{direction}_primer").set_index('index')
     # add 96-well plate well references to the dataframe
     wells_96 = generate_96_platemap()
     df["Plate_well"] = wells_96[: len(df)]
