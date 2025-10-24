@@ -1,5 +1,6 @@
 from responses import RequestsMock
 import pytest
+import pandas as pd
 
 from modules import construct_design
 from modules.construct_design import TargetData, CODON_TABLE, PrimerDirection
@@ -104,5 +105,77 @@ def test_make_primer_failed():
             protein_sequence=test_sequences.Q08345_small_sequence_fragment,
             template=test_sequences.Q08345_reverse_translate_fragment,
             direction=PrimerDirection.fwd,
+        )
+    assert str(ex.value) == expected_error_message
+
+
+example_primer_data = {
+    "fwd_primer": ["PRIMER1", "PRIMER2", "PRIMER3"],
+    "rev_primer": ["PRIMER4", "PRIMER4", "PRIMER5"],
+}
+
+
+@pytest.mark.parametrize(
+    ["input_primer_data", "input_direction", "expected_primer_names"],
+    [
+        (
+            example_primer_data,
+            PrimerDirection.fwd,
+            {
+                "fwd_primer": ["PRIMER1", "PRIMER2", "PRIMER3"],
+                "fwd_primer_name": [
+                    "fwd_primer_001",
+                    "fwd_primer_002",
+                    "fwd_primer_003",
+                ],
+            },
+        ),
+        (
+            example_primer_data,
+            PrimerDirection.rev,
+            {
+                "rev_primer": ["PRIMER4", "PRIMER5"],
+                "rev_primer_name": ["rev_primer_001", "rev_primer_002"],
+            },
+        ),
+    ],
+)
+def test_generate_primer_names(
+    input_primer_data, input_direction, expected_primer_names
+):
+    primer_name_dataframe = construct_design.generate_primer_names(
+        input_df=pd.DataFrame(input_primer_data), direction=input_direction
+    )
+    expected_primer_name_dataframe = pd.DataFrame(expected_primer_names)
+    pd.testing.assert_frame_equal(primer_name_dataframe, expected_primer_name_dataframe)
+
+
+example_bad_primer_data = {
+    "not_this_column": ["NOTAPRIMER"],
+    "not_this_column_either": ["ALSONOTAPRIMER"],
+}
+
+
+@pytest.mark.parametrize(
+    ["input_primer_data", "input_direction", "expected_error_message"],
+    [
+        (
+            example_bad_primer_data,
+            PrimerDirection.fwd,
+            "fwd_primer not found in input dataframe.",
+        ),
+        (
+            example_bad_primer_data,
+            PrimerDirection.rev,
+            "rev_primer not found in input dataframe.",
+        ),
+    ],
+)
+def test_generate_primer_names_missing_column(
+    input_primer_data, input_direction, expected_error_message
+):
+    with pytest.raises(LookupError) as ex:
+        construct_design.generate_primer_names(
+            input_df=pd.DataFrame(input_primer_data), direction=input_direction
         )
     assert str(ex.value) == expected_error_message

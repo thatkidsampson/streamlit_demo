@@ -4,6 +4,7 @@ from Bio.Data import CodonTable
 from Bio import SeqRecord
 from enum import StrEnum
 from Bio.SeqUtils import MeltingTemp as mt
+import pandas as pd
 
 # Some parameters for the designed primers:
 
@@ -117,3 +118,19 @@ def make_primer(
         n += 1
         if n > len(template):
             raise ValueError("Could not design primer")
+
+
+def generate_primer_names(
+    *, input_df: pd.DataFrame, direction: PrimerDirection
+) -> pd.DataFrame:
+    """Generate auto-names for the primers based on their direction and order."""
+    target_column = f"{direction}_primer"
+    if target_column not in input_df.columns:
+        raise LookupError(f"{target_column} not found in input dataframe.")
+    primers_names = input_df[[f"{direction}_primer"]].copy()
+    primers_names.drop_duplicates(inplace=True)
+    primers_names.reset_index(inplace=True, drop=True)
+    primers_names[f"{direction}_primer_name"] = f"{direction}_primer_" + (
+        primers_names.index + 1
+    ).astype(str).str.zfill(3)
+    return primers_names
