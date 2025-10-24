@@ -119,12 +119,12 @@ def make_primer(
         if n > len(template):
             raise ValueError("Could not design primer")
 
-def generate_primer_names(
+def generate_primer_names(*,
     input_df: pd.DataFrame, direction: PrimerDirection
 ) -> pd.DataFrame:
     """Generate auto-names for the primers based on their direction and order."""
     target_column = f"{direction}_primer"
-    if target_column not in input_df.columns():
+    if target_column not in input_df.columns:
         raise LookupError(f"{target_column} not found in input dataframe.")
     primers_names = input_df[[f"{direction}_primer"]].copy()
     primers_names.drop_duplicates(inplace=True)
