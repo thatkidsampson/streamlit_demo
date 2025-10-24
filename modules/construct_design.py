@@ -4,7 +4,9 @@ from Bio.Data import CodonTable
 from Bio import SeqRecord
 from enum import StrEnum
 from Bio.SeqUtils import MeltingTemp as mt
+from Bio.Seq import Seq
 import pandas as pd
+from string import ascii_uppercase
 
 # Some parameters for the designed primers:
 
@@ -44,6 +46,13 @@ class TargetData:
     @property
     def sequence_length(self) -> int:
         return len(self.uniprot_sequence)
+
+    @property
+    def template_dna_sequence(self) -> Seq:
+        """Returns an representative DNA sequence encoding the UniProt sequence."""
+        return Seq(
+            reverse_translate(protein_sequence=self.uniprot_sequence, table=CODON_TABLE)
+        )
 
 
 def fetch_target_data(*, uniprot_id: str) -> TargetData:
@@ -134,3 +143,54 @@ def generate_primer_names(
         primers_names.index + 1
     ).astype(str).str.zfill(3)
     return primers_names
+
+
+def generate_96_platemap() -> list[str]:
+    """Generate a list of 96-well plate references."""
+    wells = []
+    for i in range(8):
+        for c in range(1, 13):
+            r = ascii_uppercase[i]
+            wells.append(f"{r}{str(c).zfill(2)}")
+    return wells
+
+
+def slice_sequence(sequence: str, start_residue: int, end_residue: int) -> str:
+    sliced_sequence = sequence[start_residue:end_residue]
+    return sliced_sequence
+
+
+def generate_primer_dataframe(
+    *, construct_dictionary: dict, target_data: TargetData
+) -> pd.DataFrame:
+    # slice the input sequence to generate the various construct sequences
+    df = pd.DataFrame.from_dict(
+        construct_dictionary, orient="index", columns=["Start residue", "End residue"]
+    )
+    df["Sequence"] = df.apply(
+        lambda x: slice_sequence(
+            target_data.uniprot_sequence, x["Start residue"] - 1, x["End residue"] - 1
+        ),
+        axis=1,
+    )
+
+    # generate the forward and reverse primers for each sequence
+    for direction in PrimerDirection:
+        df[f"{direction}_primer_annealing"] = df["Sequence"].apply(
+            make_primer, template=target_data.template_dna_sequence, direction=direction
+        )
+        # extend these primers to include the necessary BsaI extensions
+        df[f"{direction}_primer"] = (
+            BSAI_PRIMER_EXTENSIONS[direction] + df[f"{direction}_primer_annealing"]
+        )
+        # assign the primers auto-generated names
+        primer_names = generate_primer_names(input_df=df, direction=direction)
+        # a regular merge will delete the index of the left-hand dataframe
+        # this will merge the two dataframes while preserving the left-hand index
+        df.reset_index().merge(
+            primer_names, how="left", on=f"{direction}_primer"
+        ).set_index("index")
+    # add 96-well plate well references to the dataframe
+    wells_96 = generate_96_platemap()
+    df["Plate_well"] = wells_96[: len(df)]
+    return df

@@ -1,9 +1,10 @@
 import streamlit as st
 from streamlit_molstar import st_molstar_remote
-import modules.construct_design as construct_design
 from bokeh.plotting import figure
 from bokeh.models import ColumnDataSource, HoverTool
 from streamlit_bokeh import streamlit_bokeh
+
+import modules.construct_design as construct_design
 
 st.title("Construct design tool")
 
@@ -27,7 +28,9 @@ if "target_data" not in st.session_state:
     if st.button("Fetch target structure prediction"):
         if uniprot_id_input:
             try:
-                target_data = construct_design.fetch_target_data(uniprot_id_input)
+                target_data = construct_design.fetch_target_data(
+                    uniprot_id=uniprot_id_input
+                )
                 st.session_state.target_data = target_data
                 st.success(f"Fetched data for UniProt ID: {uniprot_id_input}")
                 st_molstar_remote(
@@ -91,28 +94,24 @@ if "target_data" in st.session_state:
         # assign construct names and assemble into a dictionary
         construct_number = 1
         sequence_length = st.session_state.target_data.sequence_length
-        constructs = {
-            st.session_state.target_data.uniprot_id: [
-                str(x) for x in range(1, sequence_length)
-            ]
+        st.session_state.constructs = {
+            st.session_state.target_data.uniprot_id: (1, sequence_length)
         }
         for Nterm in st.session_state.N_term_boundaries:
             for Cterm in st.session_state.C_term_boundaries:
                 construct_name = f"{st.session_state.target_data.uniprot_id}_construct_{construct_number}"
-                constructs[construct_name] = [
-                    str(x) for x in range(Nterm + 1, Cterm + 1)
-                ]
+                st.session_state.constructs[construct_name] = (Nterm + 1, Cterm + 1)
                 construct_number += 1
 
         # assemble plot data
         x_data = []
         y_data = []
-        for construct, residue_range in constructs.items():
-            for position in residue_range:
+        for construct, residue_range in st.session_state.constructs.items():
+            for position in range(residue_range[0], residue_range[1]):
                 y_data.append(construct)
-                x_data.append(position)
+                x_data.append(str(position))
         x_range = [str(x) for x in range(1, sequence_length)]
-        y_range = list(constructs.keys())
+        y_range = list(st.session_state.constructs.keys())
         plot_height = 60 + (10 * len(y_range))
         source = ColumnDataSource(dict(x=x_data, y=y_data))
 
