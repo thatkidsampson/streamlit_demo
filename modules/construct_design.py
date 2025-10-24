@@ -22,7 +22,7 @@ class TargetData:
         return len(self.uniprot_sequence)
 
 
-def fetch_target_data(uniprot_id: str) -> TargetData:
+def fetch_target_data(*, uniprot_id: str) -> TargetData:
     """Fetches target data from AlphaFoldDB for a given UniProt ID."""
     response = requests.get(f"{ALPHAFOLDDB_BASE_URL}/{uniprot_id}", headers=HEADERS)
     if response.status_code != 200:
@@ -38,7 +38,7 @@ def fetch_target_data(uniprot_id: str) -> TargetData:
     )
     return database_info
 
-def reverse_translate(protein_sequence: str, table: CodonTable) -> str:
+def reverse_translate(*, protein_sequence: str, table: CodonTable) -> str:
     """Basic reverse translation of a protein sequence to a DNA sequence."""
     dna_sequence = ""
     for amino_acid in protein_sequence:
@@ -52,3 +52,7 @@ def reverse_translate(protein_sequence: str, table: CodonTable) -> str:
         else:
             dna_sequence += "NNN"  # Handle unknown amino acids
     return dna_sequence
+
+
+output = reverse_translate(protein_sequence="NTAREALPRTSEQ", table=CODON_TABLE)
+print(output)
