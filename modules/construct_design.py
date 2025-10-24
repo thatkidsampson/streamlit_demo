@@ -96,9 +96,8 @@ def make_primer(
         loc = (translation.find(protein_sequence) + len(protein_sequence)) * CODON_LENGTH
     # start with a primer length of 20bp
     n = MIN_PRIMER_LENGTH
-    accepted = False
     # start a while loop
-    while not accepted:
+    while True:
         # find the sequence n bases from the start or end for a fwd or rev primer
         if direction == PrimerDirection.fwd:
             primer = template[loc : loc + n]
@@ -109,8 +108,7 @@ def make_primer(
         tm = round(mt.Tm_NN(primer, nn_table=mt.DNA_NN2), 2)
         # if the primer has a Tm above the cutoff specified at the top of the notebook and ends in G or C then accept it
         if tm > PRIMER_TARGET_TM and primer[-1] in PREFERRED_END_NUCLEOTIDES:
-            accepted = True
             return str(primer)
-        # if not then make the primer 1bp longer and check again
-        else:
-            n += 1
+        n += 1
+        if n > len(template):
+            raise ValueError("Could not design primer")
