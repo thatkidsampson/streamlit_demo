@@ -119,8 +119,9 @@ def make_primer(
         if n > len(template):
             raise ValueError("Could not design primer")
 
-def generate_primer_names(*,
-    input_df: pd.DataFrame, direction: PrimerDirection
+
+def generate_primer_names(
+    *, input_df: pd.DataFrame, direction: PrimerDirection
 ) -> pd.DataFrame:
     """Generate auto-names for the primers based on their direction and order."""
     target_column = f"{direction}_primer"
