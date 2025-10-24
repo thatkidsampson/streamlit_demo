@@ -3,7 +3,7 @@ import pytest
 import pandas as pd
 
 from modules import construct_design
-from modules.construct_design import TargetData, CODON_TABLE, PrimerDirection
+from modules.construct_design import TargetData, CODON_TABLE, PrimerDirection, MERCK_PRIMER_PLATE_HEADERS
 import test_sequences
 
 
@@ -275,5 +275,38 @@ def test_generate_primer_dataframe(
     )
     expected_dataframe = pd.DataFrame.from_dict(
         expected_data, orient="index", columns=columns
+    )
+    pd.testing.assert_frame_equal(output_dataframe, expected_dataframe)
+
+
+
+# OH DEAR WE DONT HAVE THE PRIMER NAMES IN THESE OUTPUTS WHOOPS
+
+def test_make_primer_plate():  
+    input_data = {
+                "constructx": [
+                    50,
+                    73,
+                    "SSSWSDSTAARHSRLESSDGDGA",
+                    "TCTTCTTCTTGGTCTGATTCTACTGC",
+                    "TATGGTCTCACGAGTCTTCTTCTTGGTCTGATTCTACTGC",
+                    "AGCACCATCACCATCAGAAGATTCTAAAC",
+                    "TATGGTCTCAATGGCTAAGCACCATCACCATCAGAAGATTCTAAAC",
+                    "A01",
+                ],
+    }
+
+    expected_data = {MERCK_PRIMER_PLATE_HEADERS[0]: ['A01', 'A02'],
+        MERCK_PRIMER_PLATE_HEADERS[1]: ["A", "A"],
+        MERCK_PRIMER_PLATE_HEADERS[2]: [1, 2],
+    MERCK_PRIMER_PLATE_HEADERS[3]:["fwd_primer_001", "rev_primer_001"],
+    MERCK_PRIMER_PLATE_HEADERS[4]:["", ""],
+    MERCK_PRIMER_PLATE_HEADERS[5]:["FPRIMER", "RPRIMER"],
+    MERCK_PRIMER_PLATE_HEADERS[6]: ["", ""]
+    }
+
+    output_dataframe = construct_design.make_primer_plate(input_df=example_input_dataframe)
+    expected_dataframe = pd.DataFrame(
+        expected_data
     )
     pd.testing.assert_frame_equal(output_dataframe, expected_dataframe)
