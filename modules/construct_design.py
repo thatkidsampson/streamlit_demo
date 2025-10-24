@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 import requests
+from Bio.Data import CodonTable
 
 # Base URL for AlphaFoldDB API and headers for requests
 ALPHAFOLDDB_BASE_URL = "https://alphafold.ebi.ac.uk/api/prediction"
@@ -7,6 +8,8 @@ HEADERS = {
     "Accept": "application/json",
 }
 
+# CodonTable for reverse translation
+CODON_TABLE = CodonTable.unambiguous_dna_by_id[1]  # Standard table
 
 @dataclass
 class TargetData:
@@ -34,3 +37,18 @@ def fetch_target_data(uniprot_id: str) -> TargetData:
         alphafold_db_url=first_prediction["pdbUrl"],
     )
     return database_info
+
+def reverse_translate(protein_sequence: str, table: CodonTable) -> str:
+    """Basic reverse translation of a protein sequence to a DNA sequence."""
+    dna_sequence = ""
+    for amino_acid in protein_sequence:
+        codons = [
+            codon for codon, aa in table.forward_table.items() if aa == amino_acid
+        ]
+        if codons:
+            # Just take the first codon for simplicity
+            chosen_codon = codons[0]
+            dna_sequence += chosen_codon
+        else:
+            dna_sequence += "NNN"  # Handle unknown amino acids
+    return dna_sequence
