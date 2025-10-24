@@ -179,3 +179,42 @@ def test_generate_primer_names_missing_column(
             input_df=pd.DataFrame(input_primer_data), direction=input_direction
         )
     assert str(ex.value) == expected_error_message
+
+
+example_target_data = TargetData(
+        uniprot_id="UniProtID",
+        uniprot_sequence=test_sequences.Q08345_sequence_fragment,
+        alphafold_db_url="ExampleURL",
+    )
+
+columns=["Start residue", "End residue", "Sequence","fwd_primer_annealing","fwd_primer","rev_primer_annealing","rev_primer","Plate_well"]
+@pytest.mark.parametrize(
+    ["example_construct_dictionary", "example_target_data", "expected_data"],
+    [
+        (
+            {"construct1" : (10, 40),
+             "construct2" : (30,60)},
+            example_target_data,
+            {"construct1":[10,40,"LLLLLVASGDADMKGHFDPAKCRYALGMQD","TTATTATTATTATTAGTTGCTTCTGGTGATGCTG","TATGGTCTCACGAGTTATTATTATTATTAGTTGCTTCTGGTGATGCTG","ATCTTGCATACCTAAAGCATAACGACATTTAG","TATGGTCTCAATGGCTAATCTTGCATACCTAAAGCATAACGACATTTAG","A01"],
+            "construct2" : [30,60,"KCRYALGMQDRTIPDSDISASSSWSDSTAA","AAATGTCGTTATGCTTTAGGTATGCAAG","TATGGTCTCACGAGAAATGTCGTTATGCTTTAGGTATGCAAG","AGCAGCAGTAGAATCAGACCAAGAAG","TATGGTCTCAATGGCTAAGCAGCAGTAGAATCAGACCAAGAAG","A02"]
+            },
+        ),
+        (
+            {"constructx" : (50, 73),
+"constructy" : (20, 42),
+"constructz": (20, 73)},
+            example_target_data,
+            {"constructx":[50,73,"SSSWSDSTAARHSRLESSDGDGA","TCTTCTTCTTGGTCTGATTCTACTGC","TATGGTCTCACGAGTCTTCTTCTTGGTCTGATTCTACTGC","AGCACCATCACCATCAGAAGATTCTAAAC","TATGGTCTCAATGGCTAAGCACCATCACCATCAGAAGATTCTAAAC","A01"],
+"constructy":[20,42,"ADMKGHFDPAKCRYALGMQDRT","GCTGATATGAAAGGTCATTTTGATCCTG","TATGGTCTCACGAGGCTGATATGAAAGGTCATTTTGATCCTG","AGTACGATCTTGCATACCTAAAGCATAAC","TATGGTCTCAATGGCTAAGTACGATCTTGCATACCTAAAGCATAAC","A02"],
+"constructz":[20,73,"ADMKGHFDPAKCRYALGMQDRTIPDSDISASSSWSDSTAARHSRLESSDGDGA","GCTGATATGAAAGGTCATTTTGATCCTG","TATGGTCTCACGAGGCTGATATGAAAGGTCATTTTGATCCTG","AGCACCATCACCATCAGAAGATTCTAAAC","TATGGTCTCAATGGCTAAGCACCATCACCATCAGAAGATTCTAAAC","A03"]
+            }
+        )
+    ],
+)
+def test_generate_primer_dataframe(example_construct_dictionary, example_target_data, expected_data):
+    output_dataframe = construct_design.generate_primer_dataframe(construct_dictionary=example_construct_dictionary,
+                                                                           target_data=example_target_data
+    )
+    expected_dataframe = pd.DataFrame.from_dict(expected_data, orient='index',
+                       columns=columns)
+    pd.testing.assert_frame_equal(output_dataframe, expected_dataframe)
