@@ -1,6 +1,22 @@
 from dataclasses import dataclass
 import requests
 from Bio.Data import CodonTable
+from Bio import SeqRecord
+from enum import StrEnum
+from Bio.SeqUtils import MeltingTemp as mt
+
+# Some parameters for the designed primers:
+
+# the required Tm of the annealing portion of the primers:
+PRIMER_TARGET_TM = 60
+# BsaI restriction site extensions for the primers:
+BSAI_PRIMER_EXTENSIONS = {"fwd": "TATGGTCTCACGAG", "rev": "TATGGTCTCAATGGCTA"}
+# When designing primers, we prefer them to end in G or C to reduce mispriming:
+PREFERRED_END_NUCLEOTIDES = ["G", "C"]
+# minimium primer length:
+MIN_PRIMER_LENGTH = 20
+# Codon length, in base pairs
+CODON_LENGTH = 3
 
 # Base URL for AlphaFoldDB API and headers for requests
 ALPHAFOLDDB_BASE_URL = "https://alphafold.ebi.ac.uk/api/prediction"
@@ -10,6 +26,13 @@ HEADERS = {
 
 # CodonTable for reverse translation
 CODON_TABLE = CodonTable.unambiguous_dna_by_id[1]  # Standard table
+
+
+# StrEnum for primer directions
+class PrimerDirection(StrEnum):
+    fwd = "fwd"
+    rev = "rev"
+
 
 @dataclass
 class TargetData:
@@ -38,6 +61,7 @@ def fetch_target_data(*, uniprot_id: str) -> TargetData:
     )
     return database_info
 
+
 def reverse_translate(*, protein_sequence: str, table: CodonTable) -> str:
     """Basic reverse translation of a protein sequence to a DNA sequence."""
     dna_sequence = ""
@@ -54,5 +78,42 @@ def reverse_translate(*, protein_sequence: str, table: CodonTable) -> str:
     return dna_sequence
 
 
-output = reverse_translate(protein_sequence="NTAREALPRTSEQ", table=CODON_TABLE)
-print(output)
+def make_primer(
+    protein_sequence: str, template: SeqRecord, direction: PrimerDirection
+) -> str:
+    """Generates a primer sequence for a given protein sequence and template DNA sequence.
+    Args:
+        protein_sequence (str): The protein sequence for which to design the primer.
+        template (SeqRecord): The template DNA sequence from which to design the primer.
+        direction (PrimerDirection): The direction of the primer (forward or reverse).
+    Returns:
+        str: The designed primer sequence.
+    """
+    # translate the template DNA sequence into a protein sequence
+    translation = template.translate()
+    # for a fwd primer, find the start point of the construct protein sequence in the translated template sequence
+    if direction == PrimerDirection.fwd:
+        loc = translation.find(protein_sequence) * CODON_LENGTH
+    # for a rev primer, find the end point of the construct protein sequence in the translated template sequence
+    if direction == PrimerDirection.rev:
+        loc = (
+            translation.find(protein_sequence) + len(protein_sequence)
+        ) * CODON_LENGTH
+    # start with a primer length of 20bp
+    n = MIN_PRIMER_LENGTH
+    # start a while loop
+    while True:
+        # find the sequence n bases from the start or end for a fwd or rev primer
+        if direction == PrimerDirection.fwd:
+            primer = template[loc : loc + n]
+        if direction == PrimerDirection.rev:
+            primer = template[loc - n : loc]
+            primer = (primer).reverse_complement()
+        # get the tm of that primer sequence
+        tm = round(mt.Tm_NN(primer, nn_table=mt.DNA_NN2), 2)
+        # if the primer has a Tm above the cutoff specified at the top of the notebook and ends in G or C then accept it
+        if tm > PRIMER_TARGET_TM and primer[-1] in PREFERRED_END_NUCLEOTIDES:
+            return str(primer)
+        n += 1
+        if n > len(template):
+            raise ValueError("Could not design primer")
