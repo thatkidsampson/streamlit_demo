@@ -1,5 +1,7 @@
 # requirements.in
 streamlit
+streamlit-molstar
+streamlit-bokeh
 bokeh
 requests
 pytest
