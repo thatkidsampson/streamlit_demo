@@ -195,11 +195,12 @@ def generate_primer_dataframe(
         )
         # assign the primers auto-generated names
         primer_names = generate_primer_names(input_df=df, direction=direction)
-        # a regular merge will delete the index of the left-hand dataframe
-        # this will merge the two dataframes while preserving the left-hand index
-        df.reset_index().merge(
-            primer_names, how="left", on=f"{direction}_primer"
-        ).set_index("index")
+        # merge the dataframes while preserving the left dataframe's index
+        df = pd.merge(
+            df.reset_index(), primer_names, how="left", on=f"{direction}_primer"
+        ).set_index('index')
+        # make sure the index is unnamed to match the test expectations
+        df.index.name = None
     # add 96-well plate well references to the dataframe
     wells_96 = generate_96_platemap()
     df["Plate_well"] = wells_96[: len(df)]
