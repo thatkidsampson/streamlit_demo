@@ -1,12 +1,12 @@
 from dataclasses import dataclass
 import requests
 from Bio.Data import CodonTable
-from Bio import SeqRecord
 from enum import StrEnum
 from Bio.SeqUtils import MeltingTemp as mt
 from Bio.Seq import Seq
 import pandas as pd
 from string import ascii_uppercase
+from typing import Any
 
 # Some parameters for the designed primers:
 
@@ -83,7 +83,7 @@ def fetch_target_data(*, uniprot_id: str) -> TargetData:
     return database_info
 
 
-def reverse_translate(*, protein_sequence: str, table: CodonTable) -> str:
+def reverse_translate(*, protein_sequence: str, table: Any) -> str:
     """Basic reverse translation of a protein sequence to a DNA sequence."""
     dna_sequence = ""
     for amino_acid in protein_sequence:
@@ -97,10 +97,11 @@ def reverse_translate(*, protein_sequence: str, table: CodonTable) -> str:
         else:
             dna_sequence += "NNN"  # Handle unknown amino acids
     return dna_sequence
+    return dna_sequence
 
 
 def make_primer(
-    protein_sequence: str, template: SeqRecord, direction: PrimerDirection
+    protein_sequence: str, template: Seq, direction: PrimerDirection
 ) -> str:
     """Generates a primer sequence for a given protein sequence and template DNA sequence.
     Args:
@@ -200,6 +201,7 @@ def generate_primer_dataframe(
         df = pd.merge(
             df.reset_index(), primer_names, how="left", on=f"{direction}_primer"
         ).set_index("index")
+        df.index.name = None
     # add 96-well plate well references to the dataframe
     wells_96 = generate_96_platemap()
     df["Plate_well"] = wells_96[: len(df)]

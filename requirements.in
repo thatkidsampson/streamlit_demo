@@ -8,3 +8,4 @@ pytest
 responses
 biopython
 pandas
+xlsxwriter

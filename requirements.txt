@@ -145,5 +145,7 @@ urllib3==2.5.0
     # via
     #   requests
     #   responses
+xlsxwriter==3.2.9
+    # via -r requirements.in
 xyzservices==2025.4.0
     # via bokeh

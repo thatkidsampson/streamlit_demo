@@ -296,7 +296,6 @@ def test_generate_primer_dataframe(
     expected_dataframe = pd.DataFrame.from_dict(
         expected_data, orient="index", columns=columns
     )
-    expected_dataframe.index.name = "index"
     pd.testing.assert_frame_equal(output_dataframe, expected_dataframe)
 
 
