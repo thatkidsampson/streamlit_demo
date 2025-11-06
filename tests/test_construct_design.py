@@ -200,14 +200,7 @@ columns = [
     "Plate_well",
 ]
 
-
-@pytest.mark.parametrize(
-    ["example_construct_dictionary", "example_target_data", "expected_data"],
-    [
-        (
-            {"construct1": (10, 40), "construct2": (30, 60)},
-            example_target_data,
-            {
+primer_dictionary_1 = {
                 "construct1": [
                     10,
                     40,
@@ -232,12 +225,9 @@ columns = [
                     "rev_primer_002",
                     "A02",
                 ],
-            },
-        ),
-        (
-            {"constructx": (50, 73), "constructy": (20, 42), "constructz": (20, 73)},
-            example_target_data,
-            {
+            }
+
+primer_dictionary_2 = {
                 "constructx": [
                     50,
                     73,
@@ -274,7 +264,21 @@ columns = [
                     "rev_primer_001",
                     "A03",
                 ],
-            },
+            }
+
+
+@pytest.mark.parametrize(
+    ["example_construct_dictionary", "example_target_data", "expected_data"],
+    [
+        (
+            {"construct1": (10, 40), "construct2": (30, 60)},
+            example_target_data,
+            primer_dictionary_1,
+        ),
+        (
+            {"constructx": (50, 73), "constructy": (20, 42), "constructz": (20, 73)},
+            example_target_data,
+            primer_dictionary_2,
         ),
     ],
 )
@@ -288,37 +292,31 @@ def test_generate_primer_dataframe(
     expected_dataframe = pd.DataFrame.from_dict(
         expected_data, orient="index", columns=columns
     )
+    expected_dataframe.index.name = "index"
     pd.testing.assert_frame_equal(output_dataframe, expected_dataframe)
 
 
-
-# OH DEAR WE DONT HAVE THE PRIMER NAMES IN THESE OUTPUTS WHOOPS
-
-def test_make_primer_plate():  
-    input_data = {
-                "constructx": [
-                    50,
-                    73,
-                    "SSSWSDSTAARHSRLESSDGDGA",
-                    "TCTTCTTCTTGGTCTGATTCTACTGC",
-                    "TATGGTCTCACGAGTCTTCTTCTTGGTCTGATTCTACTGC",
-                    "AGCACCATCACCATCAGAAGATTCTAAAC",
-                    "TATGGTCTCAATGGCTAAGCACCATCACCATCAGAAGATTCTAAAC",
-                    "A01",
-                ],
-    }
-
-    expected_data = {MERCK_PRIMER_PLATE_HEADERS[0]: ['A01', 'A02'],
-        MERCK_PRIMER_PLATE_HEADERS[1]: ["A", "A"],
-        MERCK_PRIMER_PLATE_HEADERS[2]: [1, 2],
-    MERCK_PRIMER_PLATE_HEADERS[3]:["fwd_primer_001", "rev_primer_001"],
-    MERCK_PRIMER_PLATE_HEADERS[4]:["", ""],
-    MERCK_PRIMER_PLATE_HEADERS[5]:["FPRIMER", "RPRIMER"],
-    MERCK_PRIMER_PLATE_HEADERS[6]: ["", ""]
-    }
+@pytest.mark.parametrize(
+    ["example_input_data", "expected_output_data"],
+    [
+        (
+            primer_dictionary_1,
+            "./tests/primer_plate_1.csv",
+        ),
+        (
+            primer_dictionary_2,
+            "./tests/primer_plate_2.csv",
+        ),
+    ],
+)
+def test_make_primer_plate(example_input_data, expected_output_data):  
+    example_input_dataframe = pd.DataFrame.from_dict(
+        example_input_data, orient="index", columns=columns
+    )
+    expected_dataframe = pd.read_csv(expected_output_data)
+    expected_dataframe["5' Mod"] = expected_dataframe["5' Mod"].astype(object).fillna("")
+    expected_dataframe["3' Mod"] = expected_dataframe["3' Mod"].astype(object).fillna("")
 
     output_dataframe = construct_design.make_primer_plate(input_df=example_input_dataframe)
-    expected_dataframe = pd.DataFrame(
-        expected_data
-    )
-    pd.testing.assert_frame_equal(output_dataframe, expected_dataframe)
+
+    pd.testing.assert_frame_equal(output_dataframe.reset_index(drop=True), expected_dataframe.reset_index(drop=True))

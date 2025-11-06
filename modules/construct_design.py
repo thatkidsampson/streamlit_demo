@@ -199,8 +199,6 @@ def generate_primer_dataframe(
         df = pd.merge(
             df.reset_index(), primer_names, how="left", on=f"{direction}_primer"
         ).set_index('index')
-        # make sure the index is unnamed to match the test expectations
-        df.index.name = None
     # add 96-well plate well references to the dataframe
     wells_96 = generate_96_platemap()
     df["Plate_well"] = wells_96[: len(df)]
