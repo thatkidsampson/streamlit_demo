@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 import requests
 from Bio.Data import CodonTable
-from Bio import SeqRecord
 from enum import StrEnum
 from Bio.SeqUtils import MeltingTemp as mt
 from Bio.Seq import Seq
@@ -82,6 +81,7 @@ def fetch_target_data(*, uniprot_id: str) -> TargetData:
         alphafold_db_url=first_prediction["pdbUrl"],
     )
     return database_info
+
 
 def reverse_translate(*, protein_sequence: str, table: Any) -> str:
     """Basic reverse translation of a protein sequence to a DNA sequence."""
