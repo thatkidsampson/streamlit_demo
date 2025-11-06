@@ -3,7 +3,11 @@ import pytest
 import pandas as pd
 
 from modules import construct_design
-from modules.construct_design import TargetData, CODON_TABLE, PrimerDirection, MERCK_PRIMER_PLATE_HEADERS
+from modules.construct_design import (
+    TargetData,
+    CODON_TABLE,
+    PrimerDirection,
+)
 import test_sequences
 
 
@@ -201,70 +205,70 @@ columns = [
 ]
 
 primer_dictionary_1 = {
-                "construct1": [
-                    10,
-                    40,
-                    "LLLLLVASGDADMKGHFDPAKCRYALGMQD",
-                    "TTATTATTATTATTAGTTGCTTCTGGTGATGCTG",
-                    "TATGGTCTCACGAGTTATTATTATTATTAGTTGCTTCTGGTGATGCTG",
-                    "fwd_primer_001",
-                    "ATCTTGCATACCTAAAGCATAACGACATTTAG",
-                    "TATGGTCTCAATGGCTAATCTTGCATACCTAAAGCATAACGACATTTAG",
-                    "rev_primer_001",
-                    "A01",
-                ],
-                "construct2": [
-                    30,
-                    60,
-                    "KCRYALGMQDRTIPDSDISASSSWSDSTAA",
-                    "AAATGTCGTTATGCTTTAGGTATGCAAG",
-                    "TATGGTCTCACGAGAAATGTCGTTATGCTTTAGGTATGCAAG",
-                    "fwd_primer_002",
-                    "AGCAGCAGTAGAATCAGACCAAGAAG",
-                    "TATGGTCTCAATGGCTAAGCAGCAGTAGAATCAGACCAAGAAG",
-                    "rev_primer_002",
-                    "A02",
-                ],
-            }
+    "construct1": [
+        10,
+        40,
+        "LLLLLVASGDADMKGHFDPAKCRYALGMQD",
+        "TTATTATTATTATTAGTTGCTTCTGGTGATGCTG",
+        "TATGGTCTCACGAGTTATTATTATTATTAGTTGCTTCTGGTGATGCTG",
+        "fwd_primer_001",
+        "ATCTTGCATACCTAAAGCATAACGACATTTAG",
+        "TATGGTCTCAATGGCTAATCTTGCATACCTAAAGCATAACGACATTTAG",
+        "rev_primer_001",
+        "A01",
+    ],
+    "construct2": [
+        30,
+        60,
+        "KCRYALGMQDRTIPDSDISASSSWSDSTAA",
+        "AAATGTCGTTATGCTTTAGGTATGCAAG",
+        "TATGGTCTCACGAGAAATGTCGTTATGCTTTAGGTATGCAAG",
+        "fwd_primer_002",
+        "AGCAGCAGTAGAATCAGACCAAGAAG",
+        "TATGGTCTCAATGGCTAAGCAGCAGTAGAATCAGACCAAGAAG",
+        "rev_primer_002",
+        "A02",
+    ],
+}
 
 primer_dictionary_2 = {
-                "constructx": [
-                    50,
-                    73,
-                    "SSSWSDSTAARHSRLESSDGDGA",
-                    "TCTTCTTCTTGGTCTGATTCTACTGC",
-                    "TATGGTCTCACGAGTCTTCTTCTTGGTCTGATTCTACTGC",
-                    "fwd_primer_001",
-                    "AGCACCATCACCATCAGAAGATTCTAAAC",
-                    "TATGGTCTCAATGGCTAAGCACCATCACCATCAGAAGATTCTAAAC",
-                    "rev_primer_001",
-                    "A01",
-                ],
-                "constructy": [
-                    20,
-                    42,
-                    "ADMKGHFDPAKCRYALGMQDRT",
-                    "GCTGATATGAAAGGTCATTTTGATCCTG",
-                    "TATGGTCTCACGAGGCTGATATGAAAGGTCATTTTGATCCTG",
-                    "fwd_primer_002",
-                    "AGTACGATCTTGCATACCTAAAGCATAAC",
-                    "TATGGTCTCAATGGCTAAGTACGATCTTGCATACCTAAAGCATAAC",
-                    "rev_primer_002",
-                    "A02",
-                ],
-                "constructz": [
-                    20,
-                    73,
-                    "ADMKGHFDPAKCRYALGMQDRTIPDSDISASSSWSDSTAARHSRLESSDGDGA",
-                    "GCTGATATGAAAGGTCATTTTGATCCTG",
-                    "TATGGTCTCACGAGGCTGATATGAAAGGTCATTTTGATCCTG",
-                    "fwd_primer_002",
-                    "AGCACCATCACCATCAGAAGATTCTAAAC",
-                    "TATGGTCTCAATGGCTAAGCACCATCACCATCAGAAGATTCTAAAC",
-                    "rev_primer_001",
-                    "A03",
-                ],
-            }
+    "constructx": [
+        50,
+        73,
+        "SSSWSDSTAARHSRLESSDGDGA",
+        "TCTTCTTCTTGGTCTGATTCTACTGC",
+        "TATGGTCTCACGAGTCTTCTTCTTGGTCTGATTCTACTGC",
+        "fwd_primer_001",
+        "AGCACCATCACCATCAGAAGATTCTAAAC",
+        "TATGGTCTCAATGGCTAAGCACCATCACCATCAGAAGATTCTAAAC",
+        "rev_primer_001",
+        "A01",
+    ],
+    "constructy": [
+        20,
+        42,
+        "ADMKGHFDPAKCRYALGMQDRT",
+        "GCTGATATGAAAGGTCATTTTGATCCTG",
+        "TATGGTCTCACGAGGCTGATATGAAAGGTCATTTTGATCCTG",
+        "fwd_primer_002",
+        "AGTACGATCTTGCATACCTAAAGCATAAC",
+        "TATGGTCTCAATGGCTAAGTACGATCTTGCATACCTAAAGCATAAC",
+        "rev_primer_002",
+        "A02",
+    ],
+    "constructz": [
+        20,
+        73,
+        "ADMKGHFDPAKCRYALGMQDRTIPDSDISASSSWSDSTAARHSRLESSDGDGA",
+        "GCTGATATGAAAGGTCATTTTGATCCTG",
+        "TATGGTCTCACGAGGCTGATATGAAAGGTCATTTTGATCCTG",
+        "fwd_primer_002",
+        "AGCACCATCACCATCAGAAGATTCTAAAC",
+        "TATGGTCTCAATGGCTAAGCACCATCACCATCAGAAGATTCTAAAC",
+        "rev_primer_001",
+        "A03",
+    ],
+}
 
 
 @pytest.mark.parametrize(
@@ -309,14 +313,23 @@ def test_generate_primer_dataframe(
         ),
     ],
 )
-def test_make_primer_plate(example_input_data, expected_output_data):  
+def test_make_primer_plate(example_input_data, expected_output_data):
     example_input_dataframe = pd.DataFrame.from_dict(
         example_input_data, orient="index", columns=columns
     )
     expected_dataframe = pd.read_csv(expected_output_data)
-    expected_dataframe["5' Mod"] = expected_dataframe["5' Mod"].astype(object).fillna("")
-    expected_dataframe["3' Mod"] = expected_dataframe["3' Mod"].astype(object).fillna("")
+    expected_dataframe["5' Mod"] = (
+        expected_dataframe["5' Mod"].astype(object).fillna("")
+    )
+    expected_dataframe["3' Mod"] = (
+        expected_dataframe["3' Mod"].astype(object).fillna("")
+    )
 
-    output_dataframe = construct_design.make_primer_plate(input_df=example_input_dataframe)
+    output_dataframe = construct_design.make_primer_plate(
+        input_df=example_input_dataframe
+    )
 
-    pd.testing.assert_frame_equal(output_dataframe.reset_index(drop=True), expected_dataframe.reset_index(drop=True))
+    pd.testing.assert_frame_equal(
+        output_dataframe.reset_index(drop=True),
+        expected_dataframe.reset_index(drop=True),
+    )

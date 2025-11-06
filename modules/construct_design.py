@@ -32,14 +32,15 @@ CODON_TABLE = CodonTable.unambiguous_dna_by_id[1]  # Standard table
 
 # Headers for the input file required by the Merck primer ordering system
 MERCK_PRIMER_PLATE_HEADERS = [
-            "Plate well",
-            "Row",
-            "Column",
-            "Name",
-            "5' Mod",
-            "Sequence (5' - 3')",
-            "3' Mod",
-        ]
+    "Plate well",
+    "Row",
+    "Column",
+    "Name",
+    "5' Mod",
+    "Sequence (5' - 3')",
+    "3' Mod",
+]
+
 
 # StrEnum for primer directions
 class PrimerDirection(StrEnum):
@@ -198,7 +199,7 @@ def generate_primer_dataframe(
         # merge the dataframes while preserving the left dataframe's index
         df = pd.merge(
             df.reset_index(), primer_names, how="left", on=f"{direction}_primer"
-        ).set_index('index')
+        ).set_index("index")
     # add 96-well plate well references to the dataframe
     wells_96 = generate_96_platemap()
     df["Plate_well"] = wells_96[: len(df)]
@@ -256,7 +257,5 @@ def make_primer_plate(input_df: pd.DataFrame) -> pd.DataFrame:
     primer_plate["5' Mod"] = ""
     primer_plate["3' Mod"] = ""
     # remove unneeded columns and order the remaining ones to fit the format
-    primer_plate = primer_plate[
-        MERCK_PRIMER_PLATE_HEADERS
-    ]
+    primer_plate = primer_plate[MERCK_PRIMER_PLATE_HEADERS]
     return primer_plate
