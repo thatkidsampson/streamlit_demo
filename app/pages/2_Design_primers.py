@@ -16,4 +16,5 @@ else:
         construct_dictionary=st.session_state.constructs,
         target_data=st.session_state.target_data,
     )
+    st.session_state.primer_dataframe = df
     st.dataframe(data=df)
