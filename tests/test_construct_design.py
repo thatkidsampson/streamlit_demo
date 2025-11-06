@@ -3,7 +3,11 @@ import pytest
 import pandas as pd
 
 from modules import construct_design
-from modules.construct_design import TargetData, CODON_TABLE, PrimerDirection
+from modules.construct_design import (
+    TargetData,
+    CODON_TABLE,
+    PrimerDirection,
+)
 import test_sequences
 
 
@@ -193,10 +197,78 @@ columns = [
     "Sequence",
     "fwd_primer_annealing",
     "fwd_primer",
+    "fwd_primer_name",
     "rev_primer_annealing",
     "rev_primer",
+    "rev_primer_name",
     "Plate_well",
 ]
+
+primer_dictionary_1 = {
+    "construct1": [
+        10,
+        40,
+        "LLLLLVASGDADMKGHFDPAKCRYALGMQD",
+        "TTATTATTATTATTAGTTGCTTCTGGTGATGCTG",
+        "TATGGTCTCACGAGTTATTATTATTATTAGTTGCTTCTGGTGATGCTG",
+        "fwd_primer_001",
+        "ATCTTGCATACCTAAAGCATAACGACATTTAG",
+        "TATGGTCTCAATGGCTAATCTTGCATACCTAAAGCATAACGACATTTAG",
+        "rev_primer_001",
+        "A01",
+    ],
+    "construct2": [
+        30,
+        60,
+        "KCRYALGMQDRTIPDSDISASSSWSDSTAA",
+        "AAATGTCGTTATGCTTTAGGTATGCAAG",
+        "TATGGTCTCACGAGAAATGTCGTTATGCTTTAGGTATGCAAG",
+        "fwd_primer_002",
+        "AGCAGCAGTAGAATCAGACCAAGAAG",
+        "TATGGTCTCAATGGCTAAGCAGCAGTAGAATCAGACCAAGAAG",
+        "rev_primer_002",
+        "A02",
+    ],
+}
+
+primer_dictionary_2 = {
+    "constructx": [
+        50,
+        73,
+        "SSSWSDSTAARHSRLESSDGDGA",
+        "TCTTCTTCTTGGTCTGATTCTACTGC",
+        "TATGGTCTCACGAGTCTTCTTCTTGGTCTGATTCTACTGC",
+        "fwd_primer_001",
+        "AGCACCATCACCATCAGAAGATTCTAAAC",
+        "TATGGTCTCAATGGCTAAGCACCATCACCATCAGAAGATTCTAAAC",
+        "rev_primer_001",
+        "A01",
+    ],
+    "constructy": [
+        20,
+        42,
+        "ADMKGHFDPAKCRYALGMQDRT",
+        "GCTGATATGAAAGGTCATTTTGATCCTG",
+        "TATGGTCTCACGAGGCTGATATGAAAGGTCATTTTGATCCTG",
+        "fwd_primer_002",
+        "AGTACGATCTTGCATACCTAAAGCATAAC",
+        "TATGGTCTCAATGGCTAAGTACGATCTTGCATACCTAAAGCATAAC",
+        "rev_primer_002",
+        "A02",
+    ],
+    "constructz": [
+        20,
+        73,
+        "ADMKGHFDPAKCRYALGMQDRTIPDSDISASSSWSDSTAARHSRLESSDGDGA",
+        "GCTGATATGAAAGGTCATTTTGATCCTG",
+        "TATGGTCTCACGAGGCTGATATGAAAGGTCATTTTGATCCTG",
+        "fwd_primer_002",
+        "AGCACCATCACCATCAGAAGATTCTAAAC",
+        "TATGGTCTCAATGGCTAAGCACCATCACCATCAGAAGATTCTAAAC",
+        "rev_primer_001",
+        "A03",
+    ],
+}
 
 
 @pytest.mark.parametrize(
@@ -205,64 +277,12 @@ columns = [
         (
             {"construct1": (10, 40), "construct2": (30, 60)},
             example_target_data,
-            {
-                "construct1": [
-                    10,
-                    40,
-                    "LLLLLVASGDADMKGHFDPAKCRYALGMQD",
-                    "TTATTATTATTATTAGTTGCTTCTGGTGATGCTG",
-                    "TATGGTCTCACGAGTTATTATTATTATTAGTTGCTTCTGGTGATGCTG",
-                    "ATCTTGCATACCTAAAGCATAACGACATTTAG",
-                    "TATGGTCTCAATGGCTAATCTTGCATACCTAAAGCATAACGACATTTAG",
-                    "A01",
-                ],
-                "construct2": [
-                    30,
-                    60,
-                    "KCRYALGMQDRTIPDSDISASSSWSDSTAA",
-                    "AAATGTCGTTATGCTTTAGGTATGCAAG",
-                    "TATGGTCTCACGAGAAATGTCGTTATGCTTTAGGTATGCAAG",
-                    "AGCAGCAGTAGAATCAGACCAAGAAG",
-                    "TATGGTCTCAATGGCTAAGCAGCAGTAGAATCAGACCAAGAAG",
-                    "A02",
-                ],
-            },
+            primer_dictionary_1,
         ),
         (
             {"constructx": (50, 73), "constructy": (20, 42), "constructz": (20, 73)},
             example_target_data,
-            {
-                "constructx": [
-                    50,
-                    73,
-                    "SSSWSDSTAARHSRLESSDGDGA",
-                    "TCTTCTTCTTGGTCTGATTCTACTGC",
-                    "TATGGTCTCACGAGTCTTCTTCTTGGTCTGATTCTACTGC",
-                    "AGCACCATCACCATCAGAAGATTCTAAAC",
-                    "TATGGTCTCAATGGCTAAGCACCATCACCATCAGAAGATTCTAAAC",
-                    "A01",
-                ],
-                "constructy": [
-                    20,
-                    42,
-                    "ADMKGHFDPAKCRYALGMQDRT",
-                    "GCTGATATGAAAGGTCATTTTGATCCTG",
-                    "TATGGTCTCACGAGGCTGATATGAAAGGTCATTTTGATCCTG",
-                    "AGTACGATCTTGCATACCTAAAGCATAAC",
-                    "TATGGTCTCAATGGCTAAGTACGATCTTGCATACCTAAAGCATAAC",
-                    "A02",
-                ],
-                "constructz": [
-                    20,
-                    73,
-                    "ADMKGHFDPAKCRYALGMQDRTIPDSDISASSSWSDSTAARHSRLESSDGDGA",
-                    "GCTGATATGAAAGGTCATTTTGATCCTG",
-                    "TATGGTCTCACGAGGCTGATATGAAAGGTCATTTTGATCCTG",
-                    "AGCACCATCACCATCAGAAGATTCTAAAC",
-                    "TATGGTCTCAATGGCTAAGCACCATCACCATCAGAAGATTCTAAAC",
-                    "A03",
-                ],
-            },
+            primer_dictionary_2,
         ),
     ],
 )
@@ -276,4 +296,40 @@ def test_generate_primer_dataframe(
     expected_dataframe = pd.DataFrame.from_dict(
         expected_data, orient="index", columns=columns
     )
+    expected_dataframe.index.name = "index"
     pd.testing.assert_frame_equal(output_dataframe, expected_dataframe)
+
+
+@pytest.mark.parametrize(
+    ["example_input_data", "expected_output_data"],
+    [
+        (
+            primer_dictionary_1,
+            "./tests/primer_plate_1.csv",
+        ),
+        (
+            primer_dictionary_2,
+            "./tests/primer_plate_2.csv",
+        ),
+    ],
+)
+def test_make_primer_plate(example_input_data, expected_output_data):
+    example_input_dataframe = pd.DataFrame.from_dict(
+        example_input_data, orient="index", columns=columns
+    )
+    expected_dataframe = pd.read_csv(expected_output_data)
+    expected_dataframe["5' Mod"] = (
+        expected_dataframe["5' Mod"].astype(object).fillna("")
+    )
+    expected_dataframe["3' Mod"] = (
+        expected_dataframe["3' Mod"].astype(object).fillna("")
+    )
+
+    output_dataframe = construct_design.make_primer_plate(
+        input_df=example_input_dataframe
+    )
+
+    pd.testing.assert_frame_equal(
+        output_dataframe.reset_index(drop=True),
+        expected_dataframe.reset_index(drop=True),
+    )

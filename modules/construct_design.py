@@ -30,6 +30,17 @@ HEADERS = {
 # CodonTable for reverse translation
 CODON_TABLE = CodonTable.unambiguous_dna_by_id[1]  # Standard table
 
+# Headers for the input file required by the Merck primer ordering system
+MERCK_PRIMER_PLATE_HEADERS = [
+    "Plate well",
+    "Row",
+    "Column",
+    "Name",
+    "5' Mod",
+    "Sequence (5' - 3')",
+    "3' Mod",
+]
+
 
 # StrEnum for primer directions
 class PrimerDirection(StrEnum):
@@ -185,12 +196,66 @@ def generate_primer_dataframe(
         )
         # assign the primers auto-generated names
         primer_names = generate_primer_names(input_df=df, direction=direction)
-        # a regular merge will delete the index of the left-hand dataframe
-        # this will merge the two dataframes while preserving the left-hand index
-        df.reset_index().merge(
-            primer_names, how="left", on=f"{direction}_primer"
+        # merge the dataframes while preserving the left dataframe's index
+        df = pd.merge(
+            df.reset_index(), primer_names, how="left", on=f"{direction}_primer"
         ).set_index("index")
     # add 96-well plate well references to the dataframe
     wells_96 = generate_96_platemap()
     df["Plate_well"] = wells_96[: len(df)]
     return df
+
+
+def generate_384_platemap() -> list[str]:
+    """Generate a list of 384-well plate references."""
+    wells = []
+    for i in range(16):
+        for c in range(1, 25):
+            r = ascii_uppercase[i]
+            wells.append(f"{r}{str(c).zfill(2)}")
+    return wells
+
+
+def make_primer_plate(input_df: pd.DataFrame) -> pd.DataFrame:
+    """Create a primer plate dataframe for ordering primers."""
+    # generate a 384-well plate map
+    wells_384 = generate_384_platemap()
+    # create a new dataframe with the 384-well plate well references
+    primer_plate = pd.DataFrame(wells_384, columns=["Plate well"])
+    primer_plate["Row"] = primer_plate["Plate well"].str[0]
+    primer_plate["Column"] = primer_plate["Plate well"].str[1:].astype(int)
+    primer_plate.sort_values(by=["Column", "Row"], inplace=True, ascending=True)
+
+    # get the primers from our input dataframe
+    primer_sets = []
+    for direction in PrimerDirection:
+        # get all the fwd primer names and sequences, rename to match the column headers needed by Merck
+        primer_set = input_df[
+            [f"{direction}_primer_name", f"{direction}_primer"]
+        ].copy()
+        primer_set.rename(
+            {
+                f"{direction}_primer_name": "Name",
+                f"{direction}_primer": "Sequence (5' - 3')",
+            },
+            axis=1,
+            inplace=True,
+        )
+        # add the dataframe to the primer sets list
+        primer_sets.append(primer_set)
+    # combine the two sets of primers into one dataframe of all the fwd + rev primers with sequences
+    all_primers = pd.concat(primer_sets)
+    # remove the duplicates so it's just a list of unique primers
+    unique_primers = all_primers.drop_duplicates(subset="Sequence (5' - 3')").copy()
+    unique_primers.reset_index(inplace=True, drop=True)
+
+    # concat to add the unique primers onto the primer_plate dataframe
+    primer_plate = pd.concat(
+        [primer_plate, unique_primers[["Name", "Sequence (5' - 3')"]]], axis=1
+    ).reindex(primer_plate.index)
+    # make 3' mod and 5' columns to match the format needed by Merck
+    primer_plate["5' Mod"] = ""
+    primer_plate["3' Mod"] = ""
+    # remove unneeded columns and order the remaining ones to fit the format
+    primer_plate = primer_plate[MERCK_PRIMER_PLATE_HEADERS]
+    return primer_plate
