@@ -30,11 +30,12 @@ HEADERS = {
 # CodonTable for reverse translation
 CODON_TABLE = CodonTable.unambiguous_dna_by_id[1]  # Standard table
 
-class ExtendedEnum(StrEnum):
 
+class ExtendedEnum(StrEnum):
     @classmethod
     def list(cls):
         return list(map(lambda c: c.value, cls))
+
 
 # Headers for the Echo input file
 class EchoHeaders(ExtendedEnum):
@@ -48,6 +49,7 @@ class EchoHeaders(ExtendedEnum):
     transfer_volume = "Transfer Volume"
     sample_name = "Sample Name"
 
+
 # Headers for the input file required by the Merck primer ordering system
 class MerckHeaders(ExtendedEnum):
     plate_well = "Plate well"
@@ -58,27 +60,37 @@ class MerckHeaders(ExtendedEnum):
     sequence = "Sequence (5' - 3')"
     mod_3 = "3' Mod"
 
+
 # StrEnum for primer directions
 class PrimerDirection(StrEnum):
     fwd = "fwd"
     rev = "rev"
 
+
 # set some constants for the Echo input file
-# these values will work in an Echo input file but are designed to be easily 
+# these values will work in an Echo input file but are designed to be easily
 # modifiable to more informative values in a real use case
-PRIMER_PLATE_NAME =  "Primer plate"
+PRIMER_PLATE_NAME = "Primer plate"
 PRIMER_PLATE_BARCODE = "primer_plate_barcode"
-PRIMER_PLATE_TYPE =  "384LDV_AQ_B2" # Beckman low dead volume 384-well plate for aqueous solutions
+PRIMER_PLATE_TYPE = (
+    "384LDV_AQ_B2"  # Beckman low dead volume 384-well plate for aqueous solutions
+)
 DESTINATION_PLATE_BARCODE = "PCR_plate_barcode"
 DESTINATION_PLATE_NAME = "PCR plate"
 
 # Echo transfer volume in nanolitres
-# Here we assume a 5ul reaction volume, 100 µM primer stock concentration, 
+# Here we assume a 5ul reaction volume, 100 µM primer stock concentration,
 # and a required final primer concentration of 250 nM
-PCR_REACTION_VOLUME = 5 # µl
-PRIMER_CONCENTRATION = 100 # µM
-REQUIRED_PRIMER_CONCENTRATION = 250 # nM
-ECHO_TRANSFER_VOLUME_NL = (REQUIRED_PRIMER_CONCENTRATION / 1000) / PRIMER_CONCENTRATION * PCR_REACTION_VOLUME * 1000 # nL
+PCR_REACTION_VOLUME = 5  # µl
+PRIMER_CONCENTRATION = 100  # µM
+REQUIRED_PRIMER_CONCENTRATION = 250  # nM
+ECHO_TRANSFER_VOLUME_NL = (
+    (REQUIRED_PRIMER_CONCENTRATION / 1000)
+    / PRIMER_CONCENTRATION
+    * PCR_REACTION_VOLUME
+    * 1000
+)  # nL
+
 
 @dataclass
 class TargetData:
@@ -263,8 +275,12 @@ def make_primer_plate(construct_df: pd.DataFrame) -> pd.DataFrame:
     # create a new dataframe with the 384-well plate well references
     primer_plate = pd.DataFrame(wells_384, columns=[MerckHeaders.plate_well])
     primer_plate[MerckHeaders.row] = primer_plate[MerckHeaders.plate_well].str[0]
-    primer_plate[MerckHeaders.column] = primer_plate[MerckHeaders.plate_well].str[1:].astype(int)
-    primer_plate.sort_values(by=[MerckHeaders.column, MerckHeaders.row], inplace=True, ascending=True)
+    primer_plate[MerckHeaders.column] = (
+        primer_plate[MerckHeaders.plate_well].str[1:].astype(int)
+    )
+    primer_plate.sort_values(
+        by=[MerckHeaders.column, MerckHeaders.row], inplace=True, ascending=True
+    )
 
     # get the primers from our input dataframe
     primer_sets = []
@@ -291,7 +307,8 @@ def make_primer_plate(construct_df: pd.DataFrame) -> pd.DataFrame:
 
     # concat to add the unique primers onto the primer_plate dataframe
     primer_plate = pd.concat(
-        [primer_plate, unique_primers[[MerckHeaders.name_, MerckHeaders.sequence]]], axis=1
+        [primer_plate, unique_primers[[MerckHeaders.name_, MerckHeaders.sequence]]],
+        axis=1,
     ).reindex(primer_plate.index)
     # make 3' mod and 5' columns to match the format needed by Merck
     primer_plate[MerckHeaders.mod_5] = ""
@@ -301,7 +318,9 @@ def make_primer_plate(construct_df: pd.DataFrame) -> pd.DataFrame:
     return primer_plate
 
 
-def make_echo_input_file(construct_df: pd.DataFrame, primer_df: pd.DataFrame) -> pd.DataFrame:
+def make_echo_input_file(
+    construct_df: pd.DataFrame, primer_df: pd.DataFrame
+) -> pd.DataFrame:
     """Create an Echo input file for transferring primers to a PCR plate.
     Args:
         construct_df (DataFrame): Details of the primers required to assemble each construct in the format output by generate_primer_dataframe.
@@ -315,7 +334,10 @@ def make_echo_input_file(construct_df: pd.DataFrame, primer_df: pd.DataFrame) ->
         primer_set = construct_df[["Plate_well", f"{direction}_primer"]].copy()
         # rename the columns to match the Echo input file format
         primer_set.rename(
-            {"Plate_well": EchoHeaders.destination_well, f"{direction}_primer": "Primer"},
+            {
+                "Plate_well": EchoHeaders.destination_well,
+                f"{direction}_primer": "Primer",
+            },
             axis=1,
             inplace=True,
         )
@@ -341,7 +363,12 @@ def make_echo_input_file(construct_df: pd.DataFrame, primer_df: pd.DataFrame) ->
     echo_df[EchoHeaders.destination_plate_barcode] = DESTINATION_PLATE_BARCODE
     echo_df[EchoHeaders.destination_plate_name] = DESTINATION_PLATE_NAME
     echo_df.rename(
-        {MerckHeaders.name_: EchoHeaders.sample_name, MerckHeaders.plate_well: EchoHeaders.source_well}, axis=1, inplace=True
+        {
+            MerckHeaders.name_: EchoHeaders.sample_name,
+            MerckHeaders.plate_well: EchoHeaders.source_well,
+        },
+        axis=1,
+        inplace=True,
     )
     echo_df = echo_df[EchoHeaders.list()]
     return echo_df
