@@ -30,21 +30,47 @@ HEADERS = {
 # CodonTable for reverse translation
 CODON_TABLE = CodonTable.unambiguous_dna_by_id[1]  # Standard table
 
+class ExtendedEnum(StrEnum):
+
+    @classmethod
+    def list(cls):
+        return list(map(lambda c: c.value, cls))
+
+# Headers for the Echo input file
+class EchoHeaders(ExtendedEnum):
+    source_plate_barcode = "Source Plate Barcode"
+    source_plate_name = "Source Plate Name"
+    source_plate_type = "Source Plate Type"
+    source_well = "Source Well"
+    destination_plate_barcode = "Destination Plate Barcode"
+    destination_plate_name = "Destination Plate Name"
+    destination_well = "Destination Well"
+    transfer_volume = "Transfer Volume"
+    sample_name = "Sample Name"
+
 # Headers for the input file required by the Merck primer ordering system
-MERCK_PRIMER_PLATE_HEADERS = [
-    "Plate well",
-    "Row",
-    "Column",
-    "Name",
-    "5' Mod",
-    "Sequence (5' - 3')",
-    "3' Mod",
-]
+class MerckHeaders(ExtendedEnum):
+    plate_well = "Plate well"
+    row = "Row"
+    column = "Column"
+    name_ = "Name"
+    mod_5 = "5' Mod"
+    sequence = "Sequence (5' - 3')"
+    mod_3 = "3' Mod"
 
 # StrEnum for primer directions
 class PrimerDirection(StrEnum):
     fwd = "fwd"
     rev = "rev"
+
+# set some constants for the Echo input file
+# these values will work in an Echo input file but are designed to be easily 
+# modifiable to more informative values in a real use case
+PRIMER_PLATE_NAME =  "Primer plate"
+PRIMER_PLATE_BARCODE = "primer_plate_barcode"
+PRIMER_PLATE_TYPE =  "384LDV_AQ_B2" # Beckman low dead volume 384-well plate for aqueous solutions
+DESTINATION_PLATE_BARCODE = "PCR_plate_barcode"
+DESTINATION_PLATE_NAME = "PCR plate"
 
 # Echo transfer volume in nanolitres
 # Here we assume a 5ul reaction volume, 100 µM primer stock concentration, 
@@ -102,7 +128,6 @@ def reverse_translate(*, protein_sequence: str, table: Any) -> str:
             dna_sequence += chosen_codon
         else:
             dna_sequence += "NNN"  # Handle unknown amino acids
-    return dna_sequence
     return dna_sequence
 
 
@@ -233,10 +258,10 @@ def make_primer_plate(construct_df: pd.DataFrame) -> pd.DataFrame:
     # generate a 384-well plate map
     wells_384 = generate_384_platemap()
     # create a new dataframe with the 384-well plate well references
-    primer_plate = pd.DataFrame(wells_384, columns=["Plate well"])
-    primer_plate["Row"] = primer_plate["Plate well"].str[0]
-    primer_plate["Column"] = primer_plate["Plate well"].str[1:].astype(int)
-    primer_plate.sort_values(by=["Column", "Row"], inplace=True, ascending=True)
+    primer_plate = pd.DataFrame(wells_384, columns=[MerckHeaders.plate_well])
+    primer_plate[MerckHeaders.row] = primer_plate[MerckHeaders.plate_well].str[0]
+    primer_plate[MerckHeaders.column] = primer_plate[MerckHeaders.plate_well].str[1:].astype(int)
+    primer_plate.sort_values(by=[MerckHeaders.column, MerckHeaders.row], inplace=True, ascending=True)
 
     # get the primers from our input dataframe
     primer_sets = []
@@ -247,8 +272,8 @@ def make_primer_plate(construct_df: pd.DataFrame) -> pd.DataFrame:
         ].copy()
         primer_set.rename(
             {
-                f"{direction}_primer_name": "Name",
-                f"{direction}_primer": "Sequence (5' - 3')",
+                f"{direction}_primer_name": MerckHeaders.name_,
+                f"{direction}_primer": MerckHeaders.sequence,
             },
             axis=1,
             inplace=True,
@@ -258,18 +283,18 @@ def make_primer_plate(construct_df: pd.DataFrame) -> pd.DataFrame:
     # combine the two sets of primers into one dataframe of all the fwd + rev primers with sequences
     all_primers = pd.concat(primer_sets)
     # remove the duplicates so it's just a list of unique primers
-    unique_primers = all_primers.drop_duplicates(subset="Sequence (5' - 3')").copy()
+    unique_primers = all_primers.drop_duplicates(subset=MerckHeaders.sequence).copy()
     unique_primers.reset_index(inplace=True, drop=True)
 
     # concat to add the unique primers onto the primer_plate dataframe
     primer_plate = pd.concat(
-        [primer_plate, unique_primers[["Name", "Sequence (5' - 3')"]]], axis=1
+        [primer_plate, unique_primers[[MerckHeaders.name_, MerckHeaders.sequence]]], axis=1
     ).reindex(primer_plate.index)
     # make 3' mod and 5' columns to match the format needed by Merck
-    primer_plate["5' Mod"] = ""
-    primer_plate["3' Mod"] = ""
+    primer_plate[MerckHeaders.mod_5] = ""
+    primer_plate[MerckHeaders.mod_3] = ""
     # remove unneeded columns and order the remaining ones to fit the format
-    primer_plate = primer_plate[MERCK_PRIMER_PLATE_HEADERS]
+    primer_plate = primer_plate[MerckHeaders.list()]
     return primer_plate
 
 
@@ -284,10 +309,10 @@ def make_echo_input_file(construct_df: pd.DataFrame, primer_df: pd.DataFrame) ->
     primer_sets = []
     for direction in PrimerDirection:
         # get the required primer for each sequence
-        primer_set = construct_df[["Plate_well", f"{direction}_primer"]].copy()
+        primer_set = construct_df[[MerckHeaders.plate_well, f"{direction}_primer"]].copy()
         # rename the columns to match the Echo input file format
         primer_set.rename(
-            {"Plate_well": "Destination Well", f"{direction}_primer": "Primer"},
+            {MerckHeaders.plate_well: EchoHeaders.destination_well, f"{direction}_primer": "Primer"},
             axis=1,
             inplace=True,
         )
@@ -301,30 +326,19 @@ def make_echo_input_file(construct_df: pd.DataFrame, primer_df: pd.DataFrame) ->
         primer_df,
         how="left",
         left_on="Primer",
-        right_on="Sequence (5' - 3')",
+        right_on=MerckHeaders.sequence,
     )
-    # make source plate name "primer plate", assign primer plate barcode and transfer volume
-    echo_df["Source Plate Name"] = "Primer plate"
-    echo_df["Source Plate Barcode"] = "primer_plate_barcode"
-    echo_df["Transfer Volume"] = ECHO_TRANSFER_VOLUME_NL
-    # set the source plate type to 384LDV_AQ_B2, which is a Beckman low dead volume 384-well plate
-    echo_df["Source Plate Type"] = "384LDV_AQ_B2"
-    echo_df["Destination Plate Barcode"] = "PCR_plate_barcode"
-    echo_df["Destination Plate Name"] = "PCR plate"
+
+    # set source plate name, source plate barcode, source plate type and transfer volume
+    echo_df[EchoHeaders.source_plate_name] = PRIMER_PLATE_NAME
+    echo_df[EchoHeaders.source_plate_barcode] = PRIMER_PLATE_BARCODE
+    echo_df[EchoHeaders.transfer_volume] = ECHO_TRANSFER_VOLUME_NL
+    echo_df[EchoHeaders.source_plate_type] = PRIMER_PLATE_TYPE
+    # set the destination plate barcode and name
+    echo_df[EchoHeaders.destination_plate_barcode] = DESTINATION_PLATE_BARCODE
+    echo_df[EchoHeaders.destination_plate_name] = DESTINATION_PLATE_NAME
     echo_df.rename(
-        {"Name": "Sample Name", "Plate well": "Source Well"}, axis=1, inplace=True
+        {MerckHeaders.name_: EchoHeaders.sample_name, MerckHeaders.plate_well: EchoHeaders.source_well}, axis=1, inplace=True
     )
-    echo_df = echo_df[
-        [
-            "Source Plate Barcode",
-            "Source Plate Name",
-            "Source Plate Type",
-            "Source Well",
-            "Destination Plate Barcode",
-            "Destination Plate Name",
-            "Destination Well",
-            "Transfer Volume",
-            "Sample Name",
-        ]
-    ]
+    echo_df = echo_df[EchoHeaders.list()]
     return echo_df
