@@ -325,7 +325,7 @@ def test_make_primer_plate(example_input_data, expected_output_data):
     )
 
     output_dataframe = construct_design.make_primer_plate(
-        input_df=example_input_dataframe
+        construct_df=example_input_dataframe
     )
 
     pd.testing.assert_frame_equal(
