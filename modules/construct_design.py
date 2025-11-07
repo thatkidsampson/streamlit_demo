@@ -224,8 +224,12 @@ def generate_384_platemap() -> list[str]:
     return wells
 
 
-def make_primer_plate(input_df: pd.DataFrame) -> pd.DataFrame:
-    """Create a primer plate dataframe for ordering primers."""
+def make_primer_plate(construct_df: pd.DataFrame) -> pd.DataFrame:
+    """Create a primer plate dataframe for ordering primers.
+    Args:
+        construct_df (DataFrame): Details of the primers required to assemble each construct in the format output by generate_primer_dataframe.
+    Returns:
+        DataFrame: Details of the primer plate to order in the format required by Merck."""
     # generate a 384-well plate map
     wells_384 = generate_384_platemap()
     # create a new dataframe with the 384-well plate well references
@@ -238,7 +242,7 @@ def make_primer_plate(input_df: pd.DataFrame) -> pd.DataFrame:
     primer_sets = []
     for direction in PrimerDirection:
         # get all the fwd primer names and sequences, rename to match the column headers needed by Merck
-        primer_set = input_df[
+        primer_set = construct_df[
             [f"{direction}_primer_name", f"{direction}_primer"]
         ].copy()
         primer_set.rename(
@@ -270,7 +274,12 @@ def make_primer_plate(input_df: pd.DataFrame) -> pd.DataFrame:
 
 
 def make_echo_input_file(construct_df: pd.DataFrame, primer_df: pd.DataFrame) -> pd.DataFrame:
-    """Create an Echo input file for transferring primers to a PCR plate."""
+    """Create an Echo input file for transferring primers to a PCR plate.
+    Args:
+        construct_df (DataFrame): Details of the primers required to assemble each construct in the format output by generate_primer_dataframe.
+        primer_df (DataFrame): Details of the primer locations in the source place, in the format output by make_primer_plate.
+    Returns:
+        DataFrame: Picklist for transfer of primers into a PCR plate in the format required by the Echo software."""
     # get all the sequences and required primers
     primer_sets = []
     for direction in PrimerDirection:
