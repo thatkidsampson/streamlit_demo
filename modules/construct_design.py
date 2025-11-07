@@ -162,7 +162,7 @@ def make_primer(
         # find the sequence n bases from the start or end for a fwd or rev primer
         if direction == PrimerDirection.fwd:
             primer = template[loc : loc + n]
-        if direction == PrimerDirection.rev:
+        elif direction == PrimerDirection.rev:
             primer = template[loc - n : loc]
             primer = (primer).reverse_complement()
         # get the tm of that primer sequence
