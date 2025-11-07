@@ -325,8 +325,43 @@ def test_make_primer_plate(example_input_data, expected_output_data):
     )
 
     output_dataframe = construct_design.make_primer_plate(
-        input_df=example_input_dataframe
+        construct_df=example_input_dataframe
     )
+
+    pd.testing.assert_frame_equal(
+        output_dataframe.reset_index(drop=True),
+        expected_dataframe.reset_index(drop=True),
+    )
+
+
+@pytest.mark.parametrize(
+    ["example_construct_data", "example_primer_plate", "expected_dataframe"],
+    [
+        (
+            primer_dictionary_1,
+            "./tests/primer_plate_1.csv",
+            "./tests/example_echo_file_1.csv",
+        ),
+        (
+            primer_dictionary_2,
+            "./tests/primer_plate_2.csv",
+            "./tests/example_echo_file_2.csv",
+        ),
+    ],
+)
+def test_make_echo_input_file(
+    example_construct_data, example_primer_plate, expected_dataframe
+):
+    example_construct_dataframe = pd.DataFrame.from_dict(
+        example_construct_data, orient="index", columns=columns
+    )
+    primer_dataframe = pd.read_csv(example_primer_plate)
+
+    output_dataframe = construct_design.make_echo_input_file(
+        construct_df=example_construct_dataframe, primer_df=primer_dataframe
+    )
+
+    expected_dataframe = pd.read_csv(expected_dataframe)
 
     pd.testing.assert_frame_equal(
         output_dataframe.reset_index(drop=True),
