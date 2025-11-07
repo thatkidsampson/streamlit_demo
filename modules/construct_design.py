@@ -41,12 +41,18 @@ MERCK_PRIMER_PLATE_HEADERS = [
     "3' Mod",
 ]
 
-
 # StrEnum for primer directions
 class PrimerDirection(StrEnum):
     fwd = "fwd"
     rev = "rev"
 
+# Echo transfer volume in nanolitres
+# Here we assume a 5ul reaction volume, 100 µM primer stock concentration, 
+# and a required final primer concentration of 250 nM
+PCR_REACTION_VOLUME = 5 # µl
+PRIMER_CONCENTRATION = 100 # µM
+REQUIRED_PRIMER_CONCENTRATION = 250 # nM
+ECHO_TRANSFER_VOLUME_NL = (REQUIRED_PRIMER_CONCENTRATION / 1000) / PRIMER_CONCENTRATION * PCR_REACTION_VOLUME * 1000 # nL
 
 @dataclass
 class TargetData:
@@ -261,3 +267,55 @@ def make_primer_plate(input_df: pd.DataFrame) -> pd.DataFrame:
     # remove unneeded columns and order the remaining ones to fit the format
     primer_plate = primer_plate[MERCK_PRIMER_PLATE_HEADERS]
     return primer_plate
+
+
+def make_echo_input_file(construct_df: pd.DataFrame, primer_df: pd.DataFrame) -> pd.DataFrame:
+    """Create an Echo input file for transferring primers to a PCR plate."""
+    # get all the sequences and required primers
+    primer_sets = []
+    for direction in PrimerDirection:
+        # get the required primer for each sequence
+        primer_set = construct_df[["Plate_well", f"{direction}_primer"]].copy()
+        # rename the columns to match the Echo input file format
+        primer_set.rename(
+            {"Plate_well": "Destination Well", f"{direction}_primer": "Primer"},
+            axis=1,
+            inplace=True,
+        )
+        # add the dataframe to the primer sets list
+        primer_sets.append(primer_set)
+    # combine the two sets of primers into one dataframe of all the fwd + rev primers with sequences
+    echo_df = pd.concat(primer_sets, ignore_index=True)
+    # merge in the primer plate dataframe to get the source plate locations for the primers
+    echo_df = pd.merge(
+        echo_df,
+        primer_df,
+        how="left",
+        left_on="Primer",
+        right_on="Sequence (5' - 3')",
+    )
+    # make source plate name "primer plate", assign primer plate barcode and transfer volume
+    echo_df["Source Plate Name"] = "Primer plate"
+    echo_df["Source Plate Barcode"] = "primer_plate_barcode"
+    echo_df["Transfer Volume"] = ECHO_TRANSFER_VOLUME_NL
+    # set the source plate type to 384LDV_AQ_B2, which is a Beckman low dead volume 384-well plate
+    echo_df["Source Plate Type"] = "384LDV_AQ_B2"
+    echo_df["Destination Plate Barcode"] = "PCR_plate_barcode"
+    echo_df["Destination Plate Name"] = "PCR plate"
+    echo_df.rename(
+        {"Name": "Sample Name", "Plate well": "Source Well"}, axis=1, inplace=True
+    )
+    echo_df = echo_df[
+        [
+            "Source Plate Barcode",
+            "Source Plate Name",
+            "Source Plate Type",
+            "Source Well",
+            "Destination Plate Barcode",
+            "Destination Plate Name",
+            "Destination Well",
+            "Transfer Volume",
+            "Sample Name",
+        ]
+    ]
+    return echo_df
