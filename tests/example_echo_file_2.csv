@@ -1,0 +1,7 @@
+Source Plate Barcode,Source Plate Name,Source Plate Type,Source Well,Destination Plate Barcode,Destination Plate Name,Destination Well,Transfer Volume,Sample Name
+primer_plate_barcode,Primer plate,384LDV_AQ_B2,A01,PCR_plate_barcode,PCR plate,A01,12.5,fwd_primer_001
+primer_plate_barcode,Primer plate,384LDV_AQ_B2,A02,PCR_plate_barcode,PCR plate,A02,12.5,fwd_primer_002
+primer_plate_barcode,Primer plate,384LDV_AQ_B2,A02,PCR_plate_barcode,PCR plate,A03,12.5,fwd_primer_002
+primer_plate_barcode,Primer plate,384LDV_AQ_B2,A03,PCR_plate_barcode,PCR plate,A01,12.5,rev_primer_001
+primer_plate_barcode,Primer plate,384LDV_AQ_B2,A04,PCR_plate_barcode,PCR plate,A02,12.5,rev_primer_002
+primer_plate_barcode,Primer plate,384LDV_AQ_B2,A03,PCR_plate_barcode,PCR plate,A03,12.5,rev_primer_001

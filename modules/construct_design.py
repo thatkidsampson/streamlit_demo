@@ -148,12 +148,12 @@ def make_primer(
     if direction == PrimerDirection.fwd:
         loc = translation.find(protein_sequence) * CODON_LENGTH
     # for a rev primer, find the end point of the construct protein sequence in the translated template sequence
-    if direction == PrimerDirection.rev:
+    elif direction == PrimerDirection.rev:
         loc = (
             translation.find(protein_sequence) + len(protein_sequence)
         ) * CODON_LENGTH
+    # If the primer direction is invalid, raise an error
     else:
-        # Check that the primer direction is valid
         raise ValueError("Invalid primer direction specified.")
     # start with a primer length of 20bp
     n = MIN_PRIMER_LENGTH
@@ -312,10 +312,10 @@ def make_echo_input_file(construct_df: pd.DataFrame, primer_df: pd.DataFrame) ->
     primer_sets = []
     for direction in PrimerDirection:
         # get the required primer for each sequence
-        primer_set = construct_df[[MerckHeaders.plate_well, f"{direction}_primer"]].copy()
+        primer_set = construct_df[["Plate_well", f"{direction}_primer"]].copy()
         # rename the columns to match the Echo input file format
         primer_set.rename(
-            {MerckHeaders.plate_well: EchoHeaders.destination_well, f"{direction}_primer": "Primer"},
+            {"Plate_well": EchoHeaders.destination_well, f"{direction}_primer": "Primer"},
             axis=1,
             inplace=True,
         )
