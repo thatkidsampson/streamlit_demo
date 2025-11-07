@@ -152,6 +152,9 @@ def make_primer(
         loc = (
             translation.find(protein_sequence) + len(protein_sequence)
         ) * CODON_LENGTH
+    else:
+        # Check that the primer direction is valid
+        raise ValueError("Invalid primer direction specified.")
     # start with a primer length of 20bp
     n = MIN_PRIMER_LENGTH
     # start a while loop
