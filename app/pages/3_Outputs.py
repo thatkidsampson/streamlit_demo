@@ -14,7 +14,7 @@ if "target_data" not in st.session_state:
 else:
     st.markdown("### Primer order form:")
     primer_order_dataframe = construct_design.make_primer_plate(
-        construct_df=st.session_state.primer_dataframe
+        construct_df=st.session_state.construct_dataframe
     )
     st.dataframe(data=primer_order_dataframe)
 
