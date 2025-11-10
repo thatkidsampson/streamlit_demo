@@ -111,3 +111,6 @@ else:
         theme="light_minimal",
         key="construct_plate_layout",
     )
+
+    if st.button("Go back to construct design page"):
+        st.switch_page("Home.py")

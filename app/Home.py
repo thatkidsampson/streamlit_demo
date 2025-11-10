@@ -140,3 +140,5 @@ if "target_data" in st.session_state:
         )
 
     reset = st.button("Clear stored boundaries", on_click=clear_boundaries)
+    if st.button("Go to primer design page"):
+        st.switch_page("pages/2_Design_primers.py")

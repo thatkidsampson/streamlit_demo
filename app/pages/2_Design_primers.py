@@ -18,3 +18,8 @@ else:
     )
     st.session_state.construct_dataframe = df
     st.dataframe(data=df)
+
+if st.button("Go back to construct design page"):
+    st.switch_page("Home.py")
+if st.button("Review outputs"):
+    st.switch_page("pages/3_Outputs.py")
