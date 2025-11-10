@@ -59,18 +59,17 @@ else:
     construct_data = st.session_state.construct_dataframe.copy()
     construct_data["Construct_name"] = construct_data.index
     plate_layout = pd.merge(plate_layout, construct_data, on="Plate_well", how="left")
-    st.dataframe(data=plate_layout)
 
     # Add a color column that's string-based for factor_cmap
     plate_layout['well_status'] = plate_layout['Construct_name'].apply(lambda x: 'Filled' if pd.notna(x) else 'Empty')
     source = ColumnDataSource(plate_layout)
 
-    
     # Create Bokeh figure
+    st.markdown("### Construct plate layout:")
     construct_plate_layout = figure(
-            height=100,
-            width=150, 
-            title="Construct plate layout",
+            height=450,
+            width=670, 
+            title=None,
             x_axis_label="Column",
             y_axis_label="Row",
             toolbar_location=None,
@@ -83,7 +82,7 @@ else:
         x="column", 
         y="row", 
         source=source, 
-        size=35, 
+        size=30, 
         fill_color=factor_cmap("well_status", ["#e6e6e6","#2ca02c"], ['Empty', 'Filled']),
         line_color="black"
     )
@@ -93,7 +92,7 @@ else:
     # Render Streamlit plot
     streamlit_bokeh(
         construct_plate_layout,
-        use_container_width=True,
+        use_container_width=False,
         theme="light_minimal",
         key="construct_plate_layout",
     )
