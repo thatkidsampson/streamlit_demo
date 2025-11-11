@@ -7,8 +7,20 @@ from streamlit_bokeh import streamlit_bokeh
 import modules.construct_design as construct_design
 
 st.title("Construct design tool")
+with st.expander("About this tool..."):
+    st.write("""
+        This tool is designed to help with the design of protein constructs for expression. \n
+        Start by entering a UniProt ID to fetch the target protein sequence and structure prediction from AlphaFoldDB. \n
+        Next, select N- and C-terminal boundaries for your constructs using the slider.\n
+        You can add multiple boundaries, and the tool will generate all possible constructs based on your selections.\n
+        Finally, proceed to the primer design page to generate primers for your constructs, and review the outputs on the outputs page. \n
+        The tool will output a primer order file in the format required by the Merck primer order system and a picklist to dispense the required primers using an Echo liquid handler.
+    """)
 
 target_sequence = None
+
+# number of wells availabke in the construct plate
+PLATE_CAPACITY = 96
 
 if "N_term_boundaries" not in st.session_state:
     st.session_state.N_term_boundaries = []
@@ -63,34 +75,54 @@ if "target_data" in st.session_state:
 
     highlighted_sequence = f"{before_selection}<mark style='background-color: #ffeb3b; padding: 2px; font-weight: bold;'>{selected_portion}</mark>{after_selection}"
     st.markdown(highlighted_sequence, unsafe_allow_html=True)
-
-    with st.form(key="Register sequence boundaries"):
-        submit_button = st.form_submit_button("Submit")
-        if submit_button:
-            if selection[0] not in st.session_state.N_term_boundaries:
-                st.session_state.N_term_boundaries.append(selection[0])
-                st.success(
-                    f"Added N-terminal boundary: {sequence_list[selection[0]]}{selection[0] + 1}"
-                )
-            if selection[1] not in st.session_state.C_term_boundaries:
-                st.session_state.C_term_boundaries.append(selection[1])
-                st.success(
-                    f"Added C-terminal boundary: {sequence_list[selection[1]]}{selection[1] + 1}"
-                )
-        if st.session_state.N_term_boundaries and st.session_state.C_term_boundaries:
-            st.markdown(
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        submit_button = st.button("Add construct boundaries", type="secondary")
+    with col2:
+        reset = st.button(
+            "Clear stored boundaries", type="primary", on_click=clear_boundaries
+        )
+    with col3:
+        st.page_link(
+            "pages/2_Design_primers.py", label="Go to primer design page", icon="🧬"
+        )
+    if submit_button:
+        if selection[0] not in st.session_state.N_term_boundaries:
+            st.session_state.N_term_boundaries.append(selection[0])
+            st.toast(
+                f"Added N-terminal boundary: {sequence_list[selection[0]]}{selection[0] + 1}",
+                icon="✅",
+            )
+        if selection[1] not in st.session_state.C_term_boundaries:
+            st.session_state.C_term_boundaries.append(selection[1])
+            st.toast(
+                f"Added C-terminal boundary: {sequence_list[selection[1]]}{selection[1] + 1}",
+                icon="✅",
+            )
+    st.markdown("#### Current construct info:")
+    with st.container(key="Register sequence boundaries", border=True):
+        # Display useful info about current boundaries and plate capacity
+        col1, col2 = st.columns(2)
+        number_of_constructs = len(st.session_state.N_term_boundaries) * len(
+            st.session_state.C_term_boundaries
+        )
+        progress = number_of_constructs / PLATE_CAPACITY
+        progress_text = f"Current number of constructs: {str(number_of_constructs)} / {PLATE_CAPACITY}"
+        with col1:
+            st.info(
                 f"Current N-terminal boundaries: {[x + 1 for x in st.session_state.N_term_boundaries]}"
             )
-            st.markdown(
+            st.warning(
                 f"Current C-terminal boundaries: {[x + 1 for x in st.session_state.C_term_boundaries]}"
             )
-        st.markdown(
-            "Current number of constructs: "
-            + str(
-                len(st.session_state.N_term_boundaries)
-                * len(st.session_state.C_term_boundaries)
-            )
-        )
+        with col2:
+            if number_of_constructs > PLATE_CAPACITY:
+                st.error(progress_text, icon="🚨")
+                my_bar = st.progress(100, text="Plate over capacity.")
+            else:
+                st.success(progress_text, icon="✅")
+                my_bar = st.progress(progress, text="Plate capacity used:")
+
         # assign construct names and assemble into a dictionary
         construct_number = 1
         sequence_length = st.session_state.target_data.sequence_length
@@ -138,5 +170,3 @@ if "target_data" in st.session_state:
             theme="streamlit",
             key="my_unique_key",
         )
-
-    reset = st.button("Clear stored boundaries", on_click=clear_boundaries)
