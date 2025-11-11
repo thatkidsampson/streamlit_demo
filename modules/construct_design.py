@@ -142,6 +142,20 @@ def reverse_translate(*, protein_sequence: str, table: Any) -> str:
             dna_sequence += "NNN"  # Handle unknown amino acids
     return dna_sequence
 
+def generate_construct_dictionary(n_term_boundaries: list[int], c_term_boundaries: list[int], target_data: TargetData, first_suffix: int =1) -> dict[str, tuple[int, int]]:
+    construct_number = first_suffix
+    sequence_length = target_data.sequence_length
+    construct_dictionary = {
+        target_data.uniprot_id: (1, sequence_length)
+    }
+    for nterm in n_term_boundaries:
+        for cterm in c_term_boundaries:
+            construct_name = f"{target_data.uniprot_id}_construct_{construct_number}"
+            # skip invalid constructs
+            if cterm >= nterm:
+                construct_dictionary[construct_name] = (nterm + 1, cterm + 1)
+                construct_number += 1
+    return construct_dictionary 
 
 def make_primer(
     protein_sequence: str, template: Seq, direction: PrimerDirection

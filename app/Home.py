@@ -124,17 +124,12 @@ if "target_data" in st.session_state:
                 my_bar = st.progress(progress, text="Plate capacity used:")
 
         # assign construct names and assemble into a dictionary
-        construct_number = 1
-        sequence_length = st.session_state.target_data.sequence_length
-        st.session_state.constructs = {
-            st.session_state.target_data.uniprot_id: (1, sequence_length)
-        }
-        for Nterm in st.session_state.N_term_boundaries:
-            for Cterm in st.session_state.C_term_boundaries:
-                construct_name = f"{st.session_state.target_data.uniprot_id}_construct_{construct_number}"
-                st.session_state.constructs[construct_name] = (Nterm + 1, Cterm + 1)
-                construct_number += 1
-
+        st.session_state.constructs = construct_design.generate_construct_dictionary(
+            n_term_boundaries=st.session_state.N_term_boundaries,
+            c_term_boundaries=st.session_state.C_term_boundaries,
+            target_data=st.session_state.target_data,      
+        )
+        
         # assemble plot data
         x_data = []
         y_data = []
