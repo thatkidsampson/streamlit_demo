@@ -367,3 +367,36 @@ def test_make_echo_input_file(
         output_dataframe.reset_index(drop=True),
         expected_dataframe.reset_index(drop=True),
     )
+
+@pytest.mark.parametrize(
+    ["example_construct_data", "example_column_header", "expected_dataframe"],
+    [
+        (
+            construct_dictionary_1,
+            "Construct_name",
+            "./tests/full_plate_layout_1.csv",
+        ),
+        (
+            construct_dictionary_2,
+            "Construct_name",
+            "./tests/full_plate_layout_2.csv",
+        ),
+    ],
+)
+def test_expand_plate_layout(
+    example_construct_data, example_column_header, expected_dataframe
+):
+    example_construct_dataframe = pd.DataFrame.from_dict(
+        example_construct_data, orient="index", columns=columns
+    )
+
+    output_dataframe = construct_design.expand_plate_layout(
+        input_df=example_construct_dataframe, index_column_name=example_column_header
+    )
+
+    expected_dataframe = pd.read_csv(expected_dataframe, dtype={"row": object, "column": object})
+
+    pd.testing.assert_frame_equal(
+        output_dataframe.reset_index(drop=True),
+        expected_dataframe.reset_index(drop=True),
+    )
