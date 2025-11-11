@@ -204,7 +204,7 @@ columns = [
     "Plate_well",
 ]
 
-primer_dictionary_1 = {
+construct_dictionary_1 = {
     "construct1": [
         10,
         40,
@@ -231,7 +231,7 @@ primer_dictionary_1 = {
     ],
 }
 
-primer_dictionary_2 = {
+construct_dictionary_2 = {
     "constructx": [
         50,
         73,
@@ -277,12 +277,12 @@ primer_dictionary_2 = {
         (
             {"construct1": (10, 40), "construct2": (30, 60)},
             example_target_data,
-            primer_dictionary_1,
+            construct_dictionary_1,
         ),
         (
             {"constructx": (50, 73), "constructy": (20, 42), "constructz": (20, 73)},
             example_target_data,
-            primer_dictionary_2,
+            construct_dictionary_2,
         ),
     ],
 )
@@ -303,11 +303,11 @@ def test_generate_primer_dataframe(
     ["example_input_data", "expected_output_data"],
     [
         (
-            primer_dictionary_1,
+            construct_dictionary_1,
             "./tests/primer_plate_1.csv",
         ),
         (
-            primer_dictionary_2,
+            construct_dictionary_2,
             "./tests/primer_plate_2.csv",
         ),
     ],
@@ -338,12 +338,12 @@ def test_make_primer_plate(example_input_data, expected_output_data):
     ["example_construct_data", "example_primer_plate", "expected_dataframe"],
     [
         (
-            primer_dictionary_1,
+            construct_dictionary_1,
             "./tests/primer_plate_1.csv",
             "./tests/example_echo_file_1.csv",
         ),
         (
-            primer_dictionary_2,
+            construct_dictionary_2,
             "./tests/primer_plate_2.csv",
             "./tests/example_echo_file_2.csv",
         ),
