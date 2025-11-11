@@ -7,6 +7,15 @@ from streamlit_bokeh import streamlit_bokeh
 import modules.construct_design as construct_design
 
 st.title("Construct design tool")
+with st.expander("About this tool..."):
+    st.write('''
+        This tool is designed to help with the design of protein constructs for expression. \n
+        Start by entering a UniProt ID to fetch the target protein sequence and structure prediction from AlphaFoldDB. \n
+        Next, select N- and C-terminal boundaries for your constructs using the slider.\n
+        You can add multiple boundaries, and the tool will generate all possible constructs based on your selections.\n
+        Finally, proceed to the primer design page to generate primers for your constructs, and review the outputs on the outputs page. \n
+        The tool will output a primer order file in the format required by the Merck primer order system and a picklist to dispense the required primers using an Echo liquid handler.
+    ''')
 
 target_sequence = None
 
