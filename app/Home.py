@@ -10,6 +10,9 @@ st.title("Construct design tool")
 
 target_sequence = None
 
+# number of wells availabke in the construct plate
+PLATE_CAPACITY = 96
+
 if "N_term_boundaries" not in st.session_state:
     st.session_state.N_term_boundaries = []
 if "C_term_boundaries" not in st.session_state:
@@ -63,34 +66,34 @@ if "target_data" in st.session_state:
 
     highlighted_sequence = f"{before_selection}<mark style='background-color: #ffeb3b; padding: 2px; font-weight: bold;'>{selected_portion}</mark>{after_selection}"
     st.markdown(highlighted_sequence, unsafe_allow_html=True)
+    submit_button = st.button("Add new construct boundaries", type="secondary")
+    if submit_button:
+        if selection[0] not in st.session_state.N_term_boundaries:
+            st.session_state.N_term_boundaries.append(selection[0])
+            st.toast(
+                f"Added N-terminal boundary: {sequence_list[selection[0]]}{selection[0] + 1}",
+                icon="✅",
+            )
+        if selection[1] not in st.session_state.C_term_boundaries:
+            st.session_state.C_term_boundaries.append(selection[1])
+            st.toast(
+                f"Added C-terminal boundary: {sequence_list[selection[1]]}{selection[1] + 1}",
+                icon="✅",
+            )
 
-    with st.form(key="Register sequence boundaries"):
-        submit_button = st.form_submit_button("Submit")
-        if submit_button:
-            if selection[0] not in st.session_state.N_term_boundaries:
-                st.session_state.N_term_boundaries.append(selection[0])
-                st.success(
-                    f"Added N-terminal boundary: {sequence_list[selection[0]]}{selection[0] + 1}"
-                )
-            if selection[1] not in st.session_state.C_term_boundaries:
-                st.session_state.C_term_boundaries.append(selection[1])
-                st.success(
-                    f"Added C-terminal boundary: {sequence_list[selection[1]]}{selection[1] + 1}"
-                )
+    with st.container(key="Register sequence boundaries"):
         if st.session_state.N_term_boundaries and st.session_state.C_term_boundaries:
-            st.markdown(
+            st.info(
                 f"Current N-terminal boundaries: {[x + 1 for x in st.session_state.N_term_boundaries]}"
             )
-            st.markdown(
+            st.warning(
                 f"Current C-terminal boundaries: {[x + 1 for x in st.session_state.C_term_boundaries]}"
             )
-        st.markdown(
-            "Current number of constructs: "
-            + str(
-                len(st.session_state.N_term_boundaries)
-                * len(st.session_state.C_term_boundaries)
-            )
-        )
+        number_of_constructs = len(st.session_state.N_term_boundaries) * len(st.session_state.C_term_boundaries)
+        progress = number_of_constructs / PLATE_CAPACITY
+        my_bar = st.progress(progress, text="Plate capacity used:")
+        progress_text = f"Current number of constructs: {str(number_of_constructs)} / {PLATE_CAPACITY}"
+        st.markdown(progress_text)
         # assign construct names and assemble into a dictionary
         construct_number = 1
         sequence_length = st.session_state.target_data.sequence_length
@@ -139,6 +142,5 @@ if "target_data" in st.session_state:
             key="my_unique_key",
         )
 
-    reset = st.button("Clear stored boundaries", on_click=clear_boundaries)
-    if st.button("Go to primer design page"):
-        st.switch_page("pages/2_Design_primers.py")
+    reset = st.button("Clear stored boundaries", type="primary", on_click=clear_boundaries)
+    st.page_link("pages/2_Design_primers.py", label="Go to primer design page", icon="🧬")

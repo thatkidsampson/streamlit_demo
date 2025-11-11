@@ -19,7 +19,5 @@ else:
     st.session_state.construct_dataframe = df
     st.dataframe(data=df)
 
-if st.button("Go back to construct design page"):
-    st.switch_page("Home.py")
-if st.button("Review outputs"):
-    st.switch_page("pages/3_Outputs.py")
+st.page_link("Home.py", label="Go back to construct design page", icon="💡")
+st.page_link("pages/3_Outputs.py", label="Review outputs", icon="🖥")
