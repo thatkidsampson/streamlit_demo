@@ -113,4 +113,6 @@ else:
     )
 
     st.page_link("Home.py", label="Go back to construct design page", icon="💡")
-    st.page_link("pages/2_Design_primers.py", label="Go to primer design page", icon="🧬")
+    st.page_link(
+        "pages/2_Design_primers.py", label="Go to primer design page", icon="🧬"
+    )

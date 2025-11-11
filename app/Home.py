@@ -8,14 +8,14 @@ import modules.construct_design as construct_design
 
 st.title("Construct design tool")
 with st.expander("About this tool..."):
-    st.write('''
+    st.write("""
         This tool is designed to help with the design of protein constructs for expression. \n
         Start by entering a UniProt ID to fetch the target protein sequence and structure prediction from AlphaFoldDB. \n
         Next, select N- and C-terminal boundaries for your constructs using the slider.\n
         You can add multiple boundaries, and the tool will generate all possible constructs based on your selections.\n
         Finally, proceed to the primer design page to generate primers for your constructs, and review the outputs on the outputs page. \n
         The tool will output a primer order file in the format required by the Merck primer order system and a picklist to dispense the required primers using an Echo liquid handler.
-    ''')
+    """)
 
 target_sequence = None
 
@@ -79,9 +79,13 @@ if "target_data" in st.session_state:
     with col1:
         submit_button = st.button("Add construct boundaries", type="secondary")
     with col2:
-        reset = st.button("Clear stored boundaries", type="primary", on_click=clear_boundaries)
+        reset = st.button(
+            "Clear stored boundaries", type="primary", on_click=clear_boundaries
+        )
     with col3:
-        st.page_link("pages/2_Design_primers.py", label="Go to primer design page", icon="🧬")
+        st.page_link(
+            "pages/2_Design_primers.py", label="Go to primer design page", icon="🧬"
+        )
     if submit_button:
         if selection[0] not in st.session_state.N_term_boundaries:
             st.session_state.N_term_boundaries.append(selection[0])
@@ -99,7 +103,9 @@ if "target_data" in st.session_state:
     with st.container(key="Register sequence boundaries", border=True):
         # Display useful info about current boundaries and plate capacity
         col1, col2 = st.columns(2)
-        number_of_constructs = len(st.session_state.N_term_boundaries) * len(st.session_state.C_term_boundaries)
+        number_of_constructs = len(st.session_state.N_term_boundaries) * len(
+            st.session_state.C_term_boundaries
+        )
         progress = number_of_constructs / PLATE_CAPACITY
         progress_text = f"Current number of constructs: {str(number_of_constructs)} / {PLATE_CAPACITY}"
         with col1:
@@ -116,7 +122,7 @@ if "target_data" in st.session_state:
             else:
                 st.success(progress_text, icon="✅")
                 my_bar = st.progress(progress, text="Plate capacity used:")
-   
+
         # assign construct names and assemble into a dictionary
         construct_number = 1
         sequence_length = st.session_state.target_data.sequence_length
