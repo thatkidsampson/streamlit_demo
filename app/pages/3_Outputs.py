@@ -53,18 +53,9 @@ else:
     )
 
     # Plot the construct plate layout
-    # assemble plot data
-    plate_layout = pd.DataFrame(
-        construct_design.generate_96_platemap(), columns=["Plate_well"]
-    )
-    plate_layout["row"] = plate_layout.Plate_well.str[:1]
-    plate_layout["column"] = plate_layout.Plate_well.str[1:].astype(
-        str
-    )  # Keep as string throughout
-    construct_data = st.session_state.construct_dataframe.copy()
-    construct_data["Construct_name"] = construct_data.index
-    plate_layout = pd.merge(plate_layout, construct_data, on="Plate_well", how="left")
-
+    # expand the construct dataframe into a full 96-well plate layout
+    plate_layout = construct_design.expand_plate_layout(input_df=st.session_state.construct_dataframe,
+                                                        index_column_name="Construct_name")
     # Add a color column that's string-based for factor_cmap
     plate_layout["well_status"] = plate_layout["Construct_name"].apply(
         lambda x: "Filled" if pd.notna(x) else "Empty"
