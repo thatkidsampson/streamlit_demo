@@ -143,6 +143,14 @@ def reverse_translate(*, protein_sequence: str, table: Any) -> str:
     return dna_sequence
 
 def generate_construct_dictionary(n_term_boundaries: list[int], c_term_boundaries: list[int], target_data: TargetData, first_suffix: int =1) -> dict[str, tuple[int, int]]:
+    """Generate a dictionary of construct names and their residue boundaries.
+    Args:
+        n_term_boundaries (list[int]): List of N-terminal boundaries (0-indexed).
+        c_term_boundaries (list[int]): List of C-terminal boundaries (0-indexed).
+        target_data (TargetData): Target data containing UniProt ID and sequence data. 
+        first_suffix (int): The starting number for construct suffixes.
+    Returns:
+        dict[str, tuple[int, int]]: Dictionary mapping construct names to (start residue, end residue) tuples."""
     construct_number = first_suffix
     sequence_length = target_data.sequence_length
     construct_dictionary = {
