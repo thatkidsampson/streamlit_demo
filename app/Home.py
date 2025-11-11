@@ -127,9 +127,9 @@ if "target_data" in st.session_state:
         st.session_state.constructs = construct_design.generate_construct_dictionary(
             n_term_boundaries=st.session_state.N_term_boundaries,
             c_term_boundaries=st.session_state.C_term_boundaries,
-            target_data=st.session_state.target_data,      
+            target_data=st.session_state.target_data,
         )
-        
+
         # assemble plot data
         x_data = []
         y_data = []

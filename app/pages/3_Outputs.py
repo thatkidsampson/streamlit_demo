@@ -54,8 +54,10 @@ else:
 
     # Plot the construct plate layout
     # expand the construct dataframe into a full 96-well plate layout
-    plate_layout = construct_design.expand_plate_layout(input_df=st.session_state.construct_dataframe,
-                                                        index_column_name="Construct_name")
+    plate_layout = construct_design.expand_plate_layout(
+        input_df=st.session_state.construct_dataframe,
+        index_column_name="Construct_name",
+    )
     # Add a color column that's string-based for factor_cmap
     plate_layout["well_status"] = plate_layout["Construct_name"].apply(
         lambda x: "Filled" if pd.notna(x) else "Empty"

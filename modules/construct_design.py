@@ -142,20 +142,24 @@ def reverse_translate(*, protein_sequence: str, table: Any) -> str:
             dna_sequence += "NNN"  # Handle unknown amino acids
     return dna_sequence
 
-def generate_construct_dictionary(n_term_boundaries: list[int], c_term_boundaries: list[int], target_data: TargetData, first_suffix: int =1) -> dict[str, tuple[int, int]]:
+
+def generate_construct_dictionary(
+    n_term_boundaries: list[int],
+    c_term_boundaries: list[int],
+    target_data: TargetData,
+    first_suffix: int = 1,
+) -> dict[str, tuple[int, int]]:
     """Generate a dictionary of construct names and their residue boundaries.
     Args:
         n_term_boundaries (list[int]): List of N-terminal boundaries (0-indexed).
         c_term_boundaries (list[int]): List of C-terminal boundaries (0-indexed).
-        target_data (TargetData): Target data containing UniProt ID and sequence data. 
+        target_data (TargetData): Target data containing UniProt ID and sequence data.
         first_suffix (int): The starting number for construct suffixes.
     Returns:
         dict[str, tuple[int, int]]: Dictionary mapping construct names to (start residue, end residue) tuples."""
     construct_number = first_suffix
     sequence_length = target_data.sequence_length
-    construct_dictionary = {
-        target_data.uniprot_id: (1, sequence_length)
-    }
+    construct_dictionary = {target_data.uniprot_id: (1, sequence_length)}
     for nterm in n_term_boundaries:
         for cterm in c_term_boundaries:
             construct_name = f"{target_data.uniprot_id}_construct_{construct_number}"
@@ -163,7 +167,8 @@ def generate_construct_dictionary(n_term_boundaries: list[int], c_term_boundarie
             if cterm >= nterm:
                 construct_dictionary[construct_name] = (nterm + 1, cterm + 1)
                 construct_number += 1
-    return construct_dictionary 
+    return construct_dictionary
+
 
 def make_primer(
     protein_sequence: str, template: Seq, direction: PrimerDirection
@@ -395,6 +400,7 @@ def make_echo_input_file(
     echo_df = echo_df[EchoHeaders.list()]
     return echo_df
 
+
 def expand_plate_layout(input_df: pd.DataFrame, index_column_name: str) -> pd.DataFrame:
     """Fill a 96-well plate layout with input data.
     The index of the input_df DataFrame is added as a column with the name specified by index_column_name.
@@ -403,13 +409,9 @@ def expand_plate_layout(input_df: pd.DataFrame, index_column_name: str) -> pd.Da
         index_column_name (str): Name to give to the index column in the input DataFrame.
     Returns:
         DataFrame: Details of the full plate layout with input data."""
-    plate_layout = pd.DataFrame(
-        generate_96_platemap(), columns=["Plate_well"]
-    )
+    plate_layout = pd.DataFrame(generate_96_platemap(), columns=["Plate_well"])
     plate_layout["row"] = plate_layout.Plate_well.str[:1]
-    plate_layout["column"] = plate_layout.Plate_well.str[1:].astype(
-        str
-    )
+    plate_layout["column"] = plate_layout.Plate_well.str[1:].astype(str)
     df = input_df.copy()
     df[index_column_name] = df.index
     plate_layout = pd.merge(plate_layout, df, on="Plate_well", how="left")

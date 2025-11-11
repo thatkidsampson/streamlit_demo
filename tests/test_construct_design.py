@@ -368,6 +368,7 @@ def test_make_echo_input_file(
         expected_dataframe.reset_index(drop=True),
     )
 
+
 @pytest.mark.parametrize(
     ["example_construct_data", "example_column_header", "expected_dataframe"],
     [
@@ -394,12 +395,15 @@ def test_expand_plate_layout(
         input_df=example_construct_dataframe, index_column_name=example_column_header
     )
 
-    expected_dataframe = pd.read_csv(expected_dataframe, dtype={"row": object, "column": object})
+    expected_dataframe = pd.read_csv(
+        expected_dataframe, dtype={"row": object, "column": object}
+    )
 
     pd.testing.assert_frame_equal(
         output_dataframe.reset_index(drop=True),
         expected_dataframe.reset_index(drop=True),
     )
+
 
 example_target_data = TargetData(
     uniprot_id="UniProtID",
@@ -408,44 +412,63 @@ example_target_data = TargetData(
 )
 
 MISSING = object()
+
+
 @pytest.mark.parametrize(
-    ["example_n_term_boundaries", "example_c_term_boundaries", "example_target_data", "example_first_suffix", "expected_output_dictionary"],
+    [
+        "example_n_term_boundaries",
+        "example_c_term_boundaries",
+        "example_target_data",
+        "example_first_suffix",
+        "expected_output_dictionary",
+    ],
     [
         pytest.param(
             [0, 8],
             [5, 11],
             example_target_data,
             MISSING,
-            {"UniProtID": (1, 188),
-            "UniProtID_construct_1": (1, 6),
-             "UniProtID_construct_2": (1, 12),
-             "UniProtID_construct_3": (9, 12)},
-             id="use-default-first-suffix",
+            {
+                "UniProtID": (1, 188),
+                "UniProtID_construct_1": (1, 6),
+                "UniProtID_construct_2": (1, 12),
+                "UniProtID_construct_3": (9, 12),
+            },
+            id="use-default-first-suffix",
         ),
         pytest.param(
             [0, 8],
             [5, 11],
             example_target_data,
             4,
-            {"UniProtID": (1, 188),
-            "UniProtID_construct_4": (1, 6),
-             "UniProtID_construct_5": (1, 12),
-             "UniProtID_construct_6": (9, 12)},
-             id="use-provided-first-suffix",
+            {
+                "UniProtID": (1, 188),
+                "UniProtID_construct_4": (1, 6),
+                "UniProtID_construct_5": (1, 12),
+                "UniProtID_construct_6": (9, 12),
+            },
+            id="use-provided-first-suffix",
         ),
     ],
 )
 def test_generate_construct_dictionary(
-    example_n_term_boundaries, example_c_term_boundaries, example_target_data, example_first_suffix, expected_output_dictionary) :
+    example_n_term_boundaries,
+    example_c_term_boundaries,
+    example_target_data,
+    example_first_suffix,
+    expected_output_dictionary,
+):
     if example_first_suffix is MISSING:
-        output_dictionary = construct_design.generate_construct_dictionary(n_term_boundaries=example_n_term_boundaries,
-                                                                        c_term_boundaries=example_c_term_boundaries,
-                                                                        target_data=example_target_data
+        output_dictionary = construct_design.generate_construct_dictionary(
+            n_term_boundaries=example_n_term_boundaries,
+            c_term_boundaries=example_c_term_boundaries,
+            target_data=example_target_data,
         )
     else:
-        output_dictionary = construct_design.generate_construct_dictionary(n_term_boundaries=example_n_term_boundaries,
-                                                                        c_term_boundaries=example_c_term_boundaries,
-                                                                        target_data=example_target_data,
-                                                                        first_suffix=example_first_suffix
+        output_dictionary = construct_design.generate_construct_dictionary(
+            n_term_boundaries=example_n_term_boundaries,
+            c_term_boundaries=example_c_term_boundaries,
+            target_data=example_target_data,
+            first_suffix=example_first_suffix,
         )
     assert output_dictionary == expected_output_dictionary
