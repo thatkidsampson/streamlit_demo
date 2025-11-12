@@ -1,4 +1,4 @@
-FROM Python:3.11
+FROM python:3.11
 
 # Cloud run expected port
 EXPOSE 8080
@@ -8,8 +8,10 @@ EXPOSE 8501
 WORKDIR /app
 
 COPY . ./
+COPY entrypoint.sh /app/
+RUN chmod +x /app/entrypoint.sh
 
 RUN pip install -r requirements.txt
 RUN pip install --no-cache-dir -e .
 
-CMD streamlit run Home.py --server.port=$PORT --server.address=0.0.0.0
+ENTRYPOINT ["/app/entrypoint.sh"]
