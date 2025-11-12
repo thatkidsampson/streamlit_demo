@@ -99,13 +99,18 @@ if "target_data" in st.session_state:
                 f"Added C-terminal boundary: {sequence_list[selection[1]]}{selection[1] + 1}",
                 icon="✅",
             )
+    # assign construct names and assemble into a dictionary
+    st.session_state.constructs = construct_design.generate_construct_dictionary(
+        n_term_boundaries=st.session_state.N_term_boundaries,
+        c_term_boundaries=st.session_state.C_term_boundaries,
+        target_data=st.session_state.target_data,
+    )
+    number_of_constructs = len(st.session_state.constructs)
     st.markdown("#### Current construct info:")
     with st.container(key="Register sequence boundaries", border=True):
         # Display useful info about current boundaries and plate capacity
         col1, col2 = st.columns(2)
-        number_of_constructs = len(st.session_state.N_term_boundaries) * len(
-            st.session_state.C_term_boundaries
-        )
+
         progress = number_of_constructs / PLATE_CAPACITY
         progress_text = f"Current number of constructs: {str(number_of_constructs)} / {PLATE_CAPACITY}"
         with col1:
@@ -122,13 +127,6 @@ if "target_data" in st.session_state:
             else:
                 st.success(progress_text, icon="✅")
                 my_bar = st.progress(progress, text="Plate capacity used:")
-
-        # assign construct names and assemble into a dictionary
-        st.session_state.constructs = construct_design.generate_construct_dictionary(
-            n_term_boundaries=st.session_state.N_term_boundaries,
-            c_term_boundaries=st.session_state.C_term_boundaries,
-            target_data=st.session_state.target_data,
-        )
 
         # assemble plot data
         x_data = []
