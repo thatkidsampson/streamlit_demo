@@ -1,4 +1,4 @@
-name: CI
+name: Pytest in CI
 on:
   pull_request:
     branches:
