@@ -1,0 +1,59 @@
+## my-apis/.github/workflows/deploy-to-google-cloudrun.yml
+name: Deploy to Cloud Run from Source
+
+on:
+  push:
+    branches: [ "main" ]
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }} # Google Cloud project ID
+  SERVICE: ${{ secrets.GCP_SERVICE_NAME }} # Cloud Run service name
+  REGION: ${{ secrets.GCP_REGION }} # Cloud Run service region
+  GCP_SERVICE_ACCOUNT_EMAIL: ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }} # Service account email
+  WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }} # Workload identity provider
+
+jobs:
+  deploy-to-cloudrun:
+    permissions:
+      id-token: write
+      contents: read
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - id: 'auth-to-google-cloud'
+        name: 'Authenticate to Google Cloud'
+        uses: 'google-github-actions/auth@v1'
+        with:
+          create_credentials_file: true
+          workload_identity_provider: ${{ env.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ env.GCP_SERVICE_ACCOUNT_EMAIL }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0.2.1
+        with:
+          version: 'latest'
+          project_id: ${{ env.PROJECT_ID }}
+          credentials_file_path: ${{ steps.auth-to-google-cloud.outputs.credentials_file_path }}
+
+      - name: 'Build and push Docker image'
+        run: |
+          gcloud builds submit --tag gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{ github.sha }}
+
+      - name: 'Deploy to Cloud Run'
+        run: |
+          gcloud run deploy ${{ env.SERVICE }} \
+            --image gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{ github.sha }} \
+            --region ${{ env.REGION }} \
+            --platform managed \
+            --allow-unauthenticated
+
+      - name: 'Test deployment'
+        run: |
+          SERVICE_URL=$(gcloud run services describe ${{ env.SERVICE }} --region ${{ env.REGION }} --format "value(status.url)")
+          echo "Service URL: $SERVICE_URL"
+          curl "$SERVICE_URL"
+        continue-on-error: true
+  
