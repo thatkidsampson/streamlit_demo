@@ -14,7 +14,8 @@ with st.expander("About this tool..."):
         Next, select N- and C-terminal boundaries for your constructs using the slider.\n
         You can add multiple boundaries, and the tool will generate all possible constructs based on your selections.\n
         Finally, proceed to the primer design page to generate primers for your constructs, and review the outputs on the outputs page. \n
-        The tool will output a primer order file in the format required by the Merck primer order system and a picklist to dispense the required primers using an Echo liquid handler.
+        The tool will output a primer order file in the format required by the Merck primer order system and a picklist to dispense the required primers using an Echo liquid handler.\n
+        Happy constuct designing!
     """)
 
 target_sequence = None
