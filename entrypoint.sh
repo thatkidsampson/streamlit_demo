@@ -11,4 +11,6 @@ streamlit run Home.py \
   --server.port=$PORT \
   --server.address=0.0.0.0 \
   --server.headless=true \
-  --logger.level=info
+  --logger.level=info \
+  --server.enableCORS=false \
+  --server.enableWebsocketCompression=false
