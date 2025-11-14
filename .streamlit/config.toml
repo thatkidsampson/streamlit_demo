@@ -7,17 +7,13 @@ toolbarMode = "viewer"
 level = "info"
 
 [server]
-# Enable CORS headers for Cloud Run
-enableCORS = true
+# Cloud Run configuration - disable these to prevent connection issues
+enableCORS = false
 enableXsrfProtection = false
 enableWebsocketCompression = false
 maxUploadSize = 200
 # Disable file watching to reduce resource usage
 fileWatcherType = "none"
-
-[browser]
-# Important for Cloud Run - prevents cross-origin issues
-serverAddress = "streamlitdemo-vk4xqig5sq-nw.a.run.app"
 
 [runner]
 magicEnabled = true
