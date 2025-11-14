@@ -1,0 +1,30 @@
+[client]
+# Disable file watcher (can cause issues in containerized environments)
+showErrorDetails = true
+toolbarMode = "viewer"
+
+[logger]
+level = "info"
+
+[server]
+# Enable CORS headers for Cloud Run
+enableCORS = true
+enableXsrfProtection = false
+enableWebsocketCompression = false
+maxUploadSize = 200
+# Disable file watching to reduce resource usage
+fileWatcherType = "none"
+
+[browser]
+# Important for Cloud Run - prevents cross-origin issues
+serverAddress = "streamlitdemo-vk4xqig5sq-nw.a.run.app"
+
+[runner]
+magicEnabled = true
+
+[theme]
+primaryColor = "#1f77b4"
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f0f2f6"
+textColor = "#262730"
+font = "sans serif"
