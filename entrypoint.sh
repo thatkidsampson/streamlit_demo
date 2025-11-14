@@ -4,13 +4,11 @@ PORT=${PORT:-8501}
 
 # Set Streamlit server configuration for Cloud Run
 export STREAMLIT_SERVER_HEADLESS=true
-export STREAMLIT_SERVER_ENABLECORS=true
+export STREAMLIT_SERVER_ENABLECORS=false
 export STREAMLIT_SERVER_ENABLEXSRFPROTECTION=false
+export STREAMLIT_SERVER_ENABLEWEBSOCKETCOMPRESSION=false
 
 streamlit run Home.py \
   --server.port=$PORT \
   --server.address=0.0.0.0 \
-  --server.headless=true \
-  --logger.level=info \
-  --server.enableCORS=false \
-  --server.enableWebsocketCompression=false
+  --logger.level=info
