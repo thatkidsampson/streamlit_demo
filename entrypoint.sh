@@ -8,6 +8,8 @@ export STREAMLIT_SERVER_ENABLECORS=false
 export STREAMLIT_SERVER_ENABLEXSRFPROTECTION=false
 export STREAMLIT_SERVER_ENABLEWEBSOCKETCOMPRESSION=false
 export STREAMLIT_CLIENT_LOGGER_LEVEL=debug
+# Disable caching to prevent Safari issues
+export STREAMLIT_CLIENT_SHOW_ERROR_DETAILS=true
 
 streamlit run Home.py \
   --server.port=$PORT \
