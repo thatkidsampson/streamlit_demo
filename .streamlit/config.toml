@@ -1,27 +1,27 @@
 [client]
-# Disable file watcher (can cause issues in containerized environments)
 showErrorDetails = true
-toolbarMode = "viewer"
-# Disable service worker caching - fixes Safari caching issues
-cacheUploadedFileDeletedState = false
 toolbarMode = "minimal"
 
 [logger]
 level = "info"
 
 [server]
-# Cloud Run configuration - disable these to prevent connection issues
+# Streamlit server config
+headless = true
+port = 8080
+address = "0.0.0.0"
 enableCORS = false
 enableXsrfProtection = false
 enableWebsocketCompression = false
+# Safari fix: disable cache control headers that confuse Safari
+useServerTime = false
+# Force reconnection on each page load
 maxUploadSize = 200
-# Disable file watching to reduce resource usage
 fileWatcherType = "none"
-# Add headers to prevent caching
-runOnSave = true
 
-[client.toolbarMode]
-# Force minimal toolbar to avoid caching issues
+[browser]
+# Safari fix: explicitly allow gatherUsageStats to prevent connection hangs
+gatherUsageStats = false
 
 [runner]
 magicEnabled = true
