@@ -2,6 +2,9 @@
 # Disable file watcher (can cause issues in containerized environments)
 showErrorDetails = true
 toolbarMode = "viewer"
+# Disable service worker caching - fixes Safari caching issues
+cacheUploadedFileDeletedState = false
+toolbarMode = "minimal"
 
 [logger]
 level = "info"
@@ -14,6 +17,11 @@ enableWebsocketCompression = false
 maxUploadSize = 200
 # Disable file watching to reduce resource usage
 fileWatcherType = "none"
+# Add headers to prevent caching
+runOnSave = true
+
+[client.toolbarMode]
+# Force minimal toolbar to avoid caching issues
 
 [runner]
 magicEnabled = true
