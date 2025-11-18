@@ -18,6 +18,6 @@ else:
     )
     st.session_state.construct_dataframe = df
     st.dataframe(data=df)
+    st.page_link("pages/3_Outputs.py", label="Review outputs", icon="🖥")
 
 st.page_link("Home.py", label="Go back to construct design page", icon="💡")
-st.page_link("pages/3_Outputs.py", label="Review outputs", icon="🖥")
