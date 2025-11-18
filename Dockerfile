@@ -1,7 +1,6 @@
-FROM python:3.11-slim
+FROM python:3.11
 
 # Cloud run expected port
-ENV PORT=8080
 EXPOSE 8080
 # Streamlit local development port
 EXPOSE 8501
