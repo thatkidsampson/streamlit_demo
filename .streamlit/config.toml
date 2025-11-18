@@ -1,0 +1,9 @@
+[server]
+enableWebsocketCompression = false
+headless = true
+
+[browser]
+gatherUsageStats = false
+
+[global]
+cacheControl = "no-store"
