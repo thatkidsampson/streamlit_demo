@@ -1,9 +1,14 @@
 [server]
+enableWebsocket = false
 enableWebsocketCompression = false
 headless = true
+maxUploadSize = 200
+fileWatcherType = "none"
 
 [browser]
 gatherUsageStats = false
+serverAddress = ""
+serverPort = 0
 
 [global]
-cacheControl = "no-store"
+disableWatchdogWarning = true
