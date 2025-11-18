@@ -1,8 +1,5 @@
 FROM python:3.11-slim
 
-#Update pip
-RUN pip install --upgrade pip
-
 # Cloud run expected port
 ENV PORT=8080
 EXPOSE 8080
@@ -16,8 +13,8 @@ WORKDIR /app
 
 COPY . ./
 COPY entrypoint.sh /app/
-
 RUN chmod +x /app/entrypoint.sh
+
 RUN pip install -r requirements.txt
 RUN pip install --no-cache-dir -e .
 
